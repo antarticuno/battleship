@@ -1,0 +1,17 @@
+[Unit]
+Description=Battleship Game
+
+[Service]
+Type=simple
+User=battleship
+Group=battleship
+Restart=on-failure
+Environment=MIX_ENV=prod "PORT=4793"
+Environment=LANG=en_US.UTF-8
+
+WorkingDirectory=/home/battleship/battleship
+ExecStart=/home/battleship/battleship/start.sh
+
+[Install]
+WantedBy=multi-user.target
+~                           
