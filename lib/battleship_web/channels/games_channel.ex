@@ -1,4 +1,4 @@
-defmodule BattleshipWeb do
+defmodule BattleshipWeb.GamesChannel do
   use BattleshipWeb, :channel
 
   alias Battleship.Game

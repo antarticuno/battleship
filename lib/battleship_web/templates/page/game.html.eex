@@ -1,0 +1,13 @@
+<script>
+ window.gameName = "<%= @name %>";
+</script>
+
+ <div class="row">
+  <div class="column">
+    <h2>Battleship: <%= @name %></h2>
+    <h4>Playing as: PLAYER-NAME-GOES-HERE</h3>
+    <div id="root">
+      React component loading...
+    </div>
+  </div>
+</div>
