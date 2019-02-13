@@ -23,7 +23,7 @@ defmodule Battleship.GameServer do
   end
 
   def guess(name, coordinate) do
-    GenServer.call(reg(name), {:guess, name, letter})
+    GenServer.call(reg(name), {:guess, name, coordinate})
   end
 
   def peek(name) do
@@ -37,7 +37,7 @@ defmodule Battleship.GameServer do
   end
 
   # TODO
-  def handle_call({:sting, player, target, coordinate}, _from, game) do
+  def handle_call({:sting, name, target, coordinate}, _from, game) do
     game = Battleship.Game.guess(game, target, coordinate)
     Battleship.BackupAgent.put(name, game)
     {:reply, game, game}
