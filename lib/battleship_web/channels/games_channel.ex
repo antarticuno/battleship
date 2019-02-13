@@ -1,4 +1,4 @@
-defmodule BattleshipWeb do
+defmodule BattleshipWeb.GamesChannel do
   use BattleshipWeb, :channel
 
   alias Battleship.Game
@@ -15,6 +15,21 @@ defmodule BattleshipWeb do
     else
       {:error, %{reason: "unauthorized"}}
     end
+  end
+
+  #TODO fill out these handle_ins
+  def handle_in("new", _payload, socket) do
+    
+  end
+
+  def handle_in("sting", payload, socket) do
+    name = socket.assigns[:name]
+    game = GameServer.guess()
+    {:reply, {:waiting, %{"game" => Game.client_view(game)}, socket}
+  end
+
+  def handle_in("place", payload, socket) do
+
   end
 
   defp update_state(socket, game) do

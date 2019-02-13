@@ -1,6 +1,9 @@
 defmodule Battleship.GameServer do
   use GenServer
 
+  alias Battleship.Game
+  alias Battleship.GameSup
+
   # Client Interface
 
   def reg(name) do
@@ -14,7 +17,7 @@ defmodule Battleship.GameServer do
       restart: :permanent,
       type: :worker,
     }
-    Battleship.GameSup.start_child(spec)
+    GameSup.start_child(spec)
   end
 
   def start_link(name) do
@@ -36,15 +39,21 @@ defmodule Battleship.GameServer do
     {:ok, game}
   end
 
-  # TODO
+  # TODO:
+  # use broadcast function from Endpoint API to send the updated state to all
   def handle_call({:sting, name, target, coordinate}, _from, game) do
-    game = Battleship.Game.guess(game, target, coordinate)
+    game = Game.guess(game, target, coordinate)
     Battleship.BackupAgent.put(name, game)
     {:reply, game, game}
   end
 
   # TODO
-  def handle_call({:peek, _name}, _from, game) do
+  def handle_call({:new, _name}, _from, game) do
     {:reply, game, game}
+  end
+
+  # TODO
+  def handle_call({:place, name, target, coordinate}, from, game) do
+  
   end
 end
