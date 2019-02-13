@@ -12,6 +12,7 @@ defmodule Battleship.Application do
       BattleshipWeb.Endpoint,
       # Starts a worker by calling: Battleship.Worker.start_link(arg)
       # {Battleship.Worker, arg},
+      Battleship.GameSup,
       Battleship.BackupAgent
     ]
 
