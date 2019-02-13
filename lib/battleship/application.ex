@@ -9,9 +9,10 @@ defmodule Battleship.Application do
     # List all child processes to be supervised
     children = [
       # Start the endpoint when the application starts
-      BattleshipWeb.Endpoint
+      BattleshipWeb.Endpoint,
       # Starts a worker by calling: Battleship.Worker.start_link(arg)
       # {Battleship.Worker, arg},
+      Battleship.BackupAgent
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html
