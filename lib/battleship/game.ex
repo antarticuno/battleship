@@ -23,13 +23,20 @@ defmodule Battleship.Game do
     }
   end
 
-    def client_view(game, player_name) do
+  def client_view(game, player_name) do
+    opponentBoards = Map.split(game.boards, [player_name])
+    myBoard = Map.get(game.boards, player_name)
+    stat = Map.get(myBoard, :caterpillers)
     %{
-      my_board: Map.get(game.boards, player_name),
-      opponents: %{}, # TODO handle multiple opponents' boards
+      my_board: myBoard,
+      opponents:  Enum.each(opponentBoards, fn {k, v} -> {k, Map.get(v, :status)} end),
       my_turn: current_turn?(game, player_name),
-      lost: false # TODO
+      lost: Enum.each(Map.get(myBoard, :caterpillers), fn {k, v} -> dead?(stat, v) end)
     }
+  end
+
+  def dead?(status, caterpillar) do
+    Enum.each(caterpillar, fn {loci} -> Map.get(status, loci) == "hit" end)
   end
 
   def add_player(game, player_name) do
