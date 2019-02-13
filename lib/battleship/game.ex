@@ -35,9 +35,22 @@ defmodule Battleship.Game do
     }
   end
 
-  def dead?(status, caterpillar) do
-    Enum.each(caterpillar, fn {loci} -> Map.get(status, loci) == "hit" end)
+  def sting(game, target, x, y) do
+    {x, _} = Integer.parse(x)
+    coordinate = stringify_posn(x, y)
+    # hit?
+    # dead?
+    # if so, update_score
+    Map.put(game, :turn, rem(Map.get(game, :turn) + 1, remaining_players(game)))
   end
+
+  # TODO fix this so that it accounts for loser players
+  def remaining_players(game) do
+    Enum.count(Map.get(game, :players))
+  end
+  
+  def stringify_posn(x, y), do: <<65+x>> <> y
+  def dead?(status, caterpillar), do: Enum.each(caterpillar, &(Map.get(status, &1) == "hit"))
 
   def add_player(game, player_name) do
     game 

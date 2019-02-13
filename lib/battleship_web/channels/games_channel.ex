@@ -25,7 +25,7 @@ defmodule BattleshipWeb.GamesChannel do
   def handle_in("sting", payload, socket) do
     name = socket.assigns[:name]
     game = GameServer.guess()
-    {:reply, {:waiting, %{"game" => Game.client_view(game)}, socket}
+    {:reply, {:waiting, %{"game" => Game.client_view(game)}, socket}}
   end
 
   def handle_in("place", payload, socket) do
