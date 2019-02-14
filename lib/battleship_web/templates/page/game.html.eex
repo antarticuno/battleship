@@ -1,11 +1,16 @@
 <script>
- window.gameName = "<%= @name %>";
+  window.gameName = "<%= @name %>";
+  window.playerName = "<%= @player_name %>";
 </script>
 
  <div class="row">
   <div class="column">
     <h2>Battleship: <%= @name %></h2>
-    <h4>Playing as: PLAYER-NAME-GOES-HERE</h3>
+    <%= if @player_name do %>
+      <h4>Playing as: <%= @player_name %></h4>
+    <% else %>
+      <h4>Observing...</h4>
+    <% end %>
     <div id="root">
       React component loading...
     </div>

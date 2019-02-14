@@ -4,6 +4,7 @@
     <%= form_for @conn, "/game", fn f -> %>
     <label>
       Game Name:<%= text_input f, :name %>
+      Player Name: <%= text_input f, :player_name %>
     </label>
     <%= submit "Join" %>
   <%end %>

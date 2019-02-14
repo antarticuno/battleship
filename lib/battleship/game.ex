@@ -23,8 +23,9 @@ defmodule Battleship.Game do
     }
   end
 
-    def client_view(game, player_name) do
+  def client_view(game, player_name) do
     %{
+      player_name: player_name,
       my_board: Map.get(game.boards, player_name),
       opponents: %{}, # TODO handle multiple opponents' boards
       my_turn: current_turn?(game, player_name),

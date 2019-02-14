@@ -12,7 +12,7 @@ class Battleship extends React.Component {
     this.channel = props.channel;
 
     this.state = {
-
+      // TODO
     }
 
     this.channel.join()
