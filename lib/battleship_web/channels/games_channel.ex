@@ -4,14 +4,16 @@ defmodule BattleshipWeb.GamesChannel do
   alias Battleship.Game
   alias Battleship.BackupAgent
 
-  def join("games:" <> name, payload, socket) do
-    if authorized?(payload) do
-      game = BackupAgent.get(name) || Game.new()
+  def join("games:" <> game_name, payload, socket) do
+    player_name = Map.get(payload, "player_name")
+
+    if authorized?(game_name, player_name) do
+      game = BackupAgent.get(game_name) || Game.new()
       socket = socket
       |> assign(:game, game)
-      |> assign(:name, name)
-      BackupAgent.put(name, game)
-      {:ok, %{"join" => name, "game" => Game.client_view(game)}, socket}
+      |> assign(:name, game_name)
+      BackupAgent.put(game_name, game)
+      {:ok, %{"join" => game_name, "game" => Game.client_view(game, player_name)}, socket}
     else
       {:error, %{reason: "unauthorized"}}
     end
@@ -25,7 +27,8 @@ defmodule BattleshipWeb.GamesChannel do
   def handle_in("sting", payload, socket) do
     name = socket.assigns[:name]
     game = GameServer.guess()
-    {:reply, {:waiting, %{"game" => Game.client_view(game)}, socket}}
+    player_name = "TODO"
+    {:reply, {:waiting, %{"game" => Game.client_view(game, player_name)}}, socket}
   end
 
   def handle_in("place", payload, socket) do
@@ -39,8 +42,9 @@ defmodule BattleshipWeb.GamesChannel do
      {:reply, {:ok, %{ "game" => Game.client_view(game)}}, socket}
    end
 
-  # TODO we'll likely need some logic here
-  defp authorized?(_payload) do
+  defp authorized?(game_name, player_name) do
+    # TODO check if player name trying to get into the right game
+    # ie: game is not full OR player is already in that game and re-connecting
     true
   end
 end
