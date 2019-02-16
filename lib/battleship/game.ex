@@ -1,7 +1,7 @@
 defmodule Battleship.Game do
   def new do
     %{
-      players: [],  # player names
+      player_names: [],
       rankings: [], # player names in order of who lost later -> earlier
       turn: 0,      # index of player whose turn it is
       score: %{},   # { player_name: Nat }
@@ -11,7 +11,7 @@ defmodule Battleship.Game do
 
   def new_board do
     %{
-      caterpillers: %{
+      caterpillars: %{
         # TODO better way to store these?
         carrier:    ["", "", "", "", ""],
         battleship: ["","","",""],
@@ -23,15 +23,35 @@ defmodule Battleship.Game do
     }
   end
 
+  # getter methods to reduce coupling to shape of game state
+
+  defp get_player_board(game, player_name) do
+    Map.get(game.boards, player_name)
+  end
+
+  defp get_player_caterpillars(game, player_name) do
+    board = get_player_board(game, player_name)
+    Map.get(board, :caterpillars)
+  end
+
+  defp get_player_status(game, player_name) do
+    board = get_player_board(game, player_name)
+    Map.get(board, :status)
+  end
+
+  defp get_opponent_boards(game, player_name) do
+    Map.split(game.boards, [player_name])
+  end
+
   def client_view(game, player_name) do
-    opponentBoards = Map.split(game.boards, [player_name])
-    myBoard = Map.get(game.boards, player_name)
-    stat = Map.get(myBoard, :caterpillers)
+    caterpillars = get_player_caterpillars(game, player_name)
+    opponentBoards = get_opponent_boards(game, player_name)
+    
     %{
-      my_board: myBoard,
+      my_board: get_player_board(game, player_name),
       opponents:  Enum.each(opponentBoards, fn {k, v} -> {k, Map.get(v, :status)} end),
       my_turn: current_turn?(game, player_name),
-      lost: Enum.each(Map.get(myBoard, :caterpillers), fn {k, v} -> dead?(stat, v) end)
+      lost: Enum.each(caterpillars, fn {k, v} -> dead?(caterpillars, v) end)
     }
   end
 
@@ -44,20 +64,27 @@ defmodule Battleship.Game do
     Map.put(game, :turn, rem(Map.get(game, :turn) + 1, remaining_players(game)))
   end
 
-  # TODO fix this so that it accounts for loser players
   def remaining_players(game) do
-    Enum.count(Map.get(game, :players))
+    Enum.count(Map.get(game, :player_names), &(player_lost?(game, &1) == false))
   end
   
   def stringify_posn(x, y), do: <<65+x>> <> y
-  def dead?(status, caterpillar), do: Enum.each(caterpillar, &(Map.get(status, &1) == "hit"))
-
+  
   def add_player(game, player_name) do
     game 
-    |> Map.put(:players, [player_name | game.players])
+    |> Map.put(:player_names, [player_name | game.player_names])
     |> Map.put(:score, Map.put(game.score, player_name, 0))
     |> Map.put(:boards, Map.put(game.boards, player_name, new_board()))
   end
+
+  # have all of this player's caterpillars been killed?
+  def player_lost?(game, player_name) do
+    caterpillars = get_player_caterpillars(game, player_name)
+    status = get_player_status(game, player_name)
+    dead?(status, caterpillars)
+  end
+
+  def dead?(status, caterpillars), do: Enum.all?(caterpillars, &(Map.get(status, &1) == "hit"))
 
   # ASSUMES: player exists in game
   def update_score(game, player_name, score_delta) do
@@ -66,7 +93,7 @@ defmodule Battleship.Game do
   end
 
   def current_turn?(game, player_name) do
-    Enum.at(game.players, game.turn) == player_name
+    Enum.at(game.player_names, game.turn) == player_name
   end
 
   # are players still placing pieces on their boards?

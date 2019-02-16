@@ -21,4 +21,12 @@ defmodule Battleship.BattleshipTest do
       boards: %{ "jj" => new_board() }
     }
   end
+
+  test "remaining players" do
+    assert remaining_players(add_player(new(), "liz")) == 1
+  end
+
+  test "player lost?" do
+    assert player_lost?(add_player(new(), "brendan"), "brendan") == false
+  end
 end
