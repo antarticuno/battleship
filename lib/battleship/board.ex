@@ -25,5 +25,16 @@ defmodule Battleship.Board do
     end
   end
 
+  def dead?(caterpillar, status) do
+    caterpillar
+    |> Enum.reduce(true, &(Map.get(status, &1) == "hit"))
+  end
+
+  def lost?(board) do
+    board.caterpillars
+    |> Map.values
+    |> Enum.reduce(true, &(dead?(&1, board.status)))
+  end
+
 
 end
