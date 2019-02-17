@@ -6,7 +6,7 @@ defmodule Battleship.Game do
     %{
       players: [],  # player names
       rankings: [], # player names in order of who lost later -> earlier
-      turn: 0,      # index of player whose turn it is
+      turn: "",      # index of player whose turn it is
       # score: %{},   # { player_name: Nat }
       boards: %{}   # { player_name : Board }
     }
@@ -19,7 +19,7 @@ defmodule Battleship.Game do
       opponents: opponents
                  |> Enum.map(fn {pn, board} -> {pn, Board.client_board(board)} end)
                  |> Map.new,                           # Map from player_name to Board status
-      my_turn: current_turn?(game, player_name),       # boolean for whether turn matches player_name
+      my_turn: game.turn == player_name,               # boolean for whether turn matches player_name
       lost: Enum.member?(game.rankings, player_name)   # boolean for whether player_name has been ranked
     }
   end
@@ -38,10 +38,8 @@ defmodule Battleship.Game do
 
     game
     |> Map.put(:boards, Map.put(game.boards, opponent, board))
-    |> Map.put(:turn, rem(Map.get(game, :turn) + 1, remaining_players(game)))
+    |> next_player
   end
-
-  defp remaining_players(game), do: length(game.players -- game.ranking)
   
   defp stringify_posn(x, y), do: <<65+x>> <> y
 
@@ -58,7 +56,14 @@ defmodule Battleship.Game do
   #  Map.put(game, :score, Map.put(game.score, player_name, new_score))
   #end
 
-  def current_turn?(game, player_name), do: Enum.at(game.players, game.turn) == player_name
+  def next_player(game) do
+    remaining_players = game.players -- game.rankings
+    next_index = remaining_players
+                 |> Enum.find_index(&(&1 == game.turn))
+                 |> Kernel.+(1)
+                 |> rem(length(remaining_players))
+    Map.put(game, :turn, Enum.at(remaining_players, next_index))
+  end
 
   # are players still placing pieces on their boards?
   def setup_done?(game) do
