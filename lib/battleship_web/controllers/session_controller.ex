@@ -8,7 +8,7 @@ defmodule BattleshipWeb.SessionController do
     |> put_session(:player_name, player_name)
     |> put_session(:name, name)
     |> put_flash(:info, "Joined #{name} as #{player_name}")
-    |> redirect(to: Routes.page_path(conn, :game, name, %{player_name: player_name}))
+    |> redirect(to: Routes.page_path(conn, :game, name))
   end
 
   def delete(conn, _params) do
