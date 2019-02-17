@@ -1,4 +1,8 @@
 defmodule Battleship.Game do
+ 
+  alias Battleship.Board
+
+
   def new do
     %{
       players: [],  # player names
@@ -24,13 +28,14 @@ defmodule Battleship.Game do
   end
 
   def client_view(game, player_name) do
-    {myBoard, opponentBoards} = Map.split(game.boards, [player_name])
+    {me, opponents} = Map.split(game.boards, [player_name])
     stat = Map.get(myBoard, :caterpillers)
+    lost = Enum.reduce(Map.values(stat), true,  fn {v, acc} -> acc and dead?(stat, v) end)
     %{
-      my_board: myBoard,
+      my_board: myBoard, # Map from player_name to Board
       opponents:  Enum.each(opponentBoards, fn {k, v} -> {k, Map.get(v, :status)} end),
       my_turn: current_turn?(game, player_name),
-      lost: Enum.reduce(Map.values(stat), true,  fn {v, acc} -> acc and dead?(stat, v) end)
+      lost: lost
     }
   end
 
@@ -41,6 +46,10 @@ defmodule Battleship.Game do
     # dead?
     # if so, update_score
     Map.put(game, :turn, rem(Map.get(game, :turn) + 1, remaining_players(game)))
+  end
+
+  def updateBoard(game, target, cell) do
+    
   end
 
   # TODO fix this so that it accounts for loser players
