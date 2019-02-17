@@ -18,6 +18,20 @@ defmodule Battleship.BattleshipTest do
 
   # Set-Up Phase ----------------------------------------------------------------------------------
 
+  defp test_caterpillars do
+    %{
+      carrier:    ["", "", "", "", ""],
+      battleship: ["","","",""],
+      cruiser:    ["", "", ""],
+      submarine:  ["", "", ""],
+      destroyer:  ["", ""]
+    }
+  end
+
+  test "intersect" do
+    
+  end
+
   test "tween coordinates" do
     assert tween_coordinates(0, 0, 3, 0) == [{0, 0}, {1, 0}, {2, 0}, {3, 0}]
     assert tween_coordinates(0, 1, 0, 5) == [{0, 1}, {0, 2}, {0, 3}, {0, 4}, {0, 5}]

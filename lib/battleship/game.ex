@@ -94,7 +94,7 @@ defmodule Battleship.Game do
     
     in_bounds?(board_width, board_height, start_x, start_y) 
       && in_bounds?(board_width, board_height, end_x, end_y) 
-      && !intersect?(board, start_x, start_y, end_x, end_y)
+      && !intersect?(Map.get(board, :caterpillars), start_x, start_y, end_x, end_y)
   end
 
   def in_bounds?(board_width, board_height, x, y) do
@@ -102,9 +102,9 @@ defmodule Battleship.Game do
   end
 
   # would the caterpillar defined by start and end intersect with any others on the board?
-  def intersect?(board, start_x, start_y, end_x, end_y) do
+  def intersect?(caterpillars, start_x, start_y, end_x, end_y) do
     caterpillar_coordinates = tween_coordinates(start_x, start_y, end_x, end_y)
-    occupied_coordinates = List.flatten(Map.values(Map.get(board, :caterpillars)))
+    occupied_coordinates = List.flatten(Map.values(caterpillars))
     Enum.any?(caterpillar_coordinates, &(Enum.member?(occupied_coordinates, &1)))
   end
 
