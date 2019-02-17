@@ -8,5 +8,14 @@
     </label>
     <%= submit "Join" %>
   <%end %>
+
+  <%= form_for @conn, Routes.session_path(@conn, :create), fn f -> %>
+    <label>
+      Game Name:<%= text_input f, :name, class: "form-control" %>
+      Player Name: <%= text_input f, :player_name, class: "form-control" %>
+    </label>
+    <%= submit "Join", class: "btn btn-secondary" %>
+  <%end %>
+
   </div>
 </div>
