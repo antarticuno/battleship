@@ -24,14 +24,13 @@ defmodule Battleship.Game do
   end
 
   def client_view(game, player_name) do
-    opponentBoards = Map.split(game.boards, [player_name])
-    myBoard = Map.get(game.boards, player_name)
+    {myBoard, opponentBoards} = Map.split(game.boards, [player_name])
     stat = Map.get(myBoard, :caterpillers)
     %{
       my_board: myBoard,
       opponents:  Enum.each(opponentBoards, fn {k, v} -> {k, Map.get(v, :status)} end),
       my_turn: current_turn?(game, player_name),
-      lost: Enum.each(Map.get(myBoard, :caterpillers), fn {k, v} -> dead?(stat, v) end)
+      lost: Enum.reduce(Map.values(stat), true,  fn {v, acc} -> acc and dead?(stat, v) end)
     }
   end
 
@@ -50,7 +49,7 @@ defmodule Battleship.Game do
   end
   
   def stringify_posn(x, y), do: <<65+x>> <> y
-  def dead?(status, caterpillar), do: Enum.each(caterpillar, &(Map.get(status, &1) == "hit"))
+  def dead?(status, caterpillar), do: Enum.reduce(caterpillar, true, &(Map.get(status, &1) == "hit" and &2))
 
   def add_player(game, player_name) do
     game 
