@@ -60,7 +60,52 @@ defmodule Battleship.BattleshipTest do
       {:error, add_player(new(), "brendan")}
   end
 
-  # Guessing Phase --------------------------------------------------------------------------------
+  # Playing Phase ---------------------------------------------------------------------------------
+
+  test "sting" do
+    game = add_player(new(), "brendan")
+
+    stung_game = %{
+      players: ["brendan"], 
+      rankings: [],
+      turn: "brendan", 
+      boards: %{ "brendan" => %{
+        caterpillars: %{
+          carrier:    [nil, nil, nil, nil, nil],
+          battleship: [nil, nil, nil, nil],
+          cruiser:    [nil, nil, nil],
+          submarine:  [nil, nil, nil],
+          destroyer:  [nil, nil]
+        },
+        status: %{{3, 4} => "miss"}
+      }},
+      board_size: %{ :width => 10, :height => 10 }
+    }
+
+    assert sting(game, "brendan", {3, 4}) == {:ok, stung_game}
+    assert sting(stung_game, "brendan", {3, 4}) == {:error, stung_game}
+
+    {:ok, stung_game} = place_caterpillar(stung_game, "brendan", :cruiser, 1, 1, true)
+    assert sting(stung_game, "brendan", {2, 1}) == {:ok, 
+      %{
+        players: ["brendan"], 
+        rankings: [],
+        turn: "brendan", 
+        boards: %{ "brendan" => %{
+          caterpillars: %{
+            carrier:    [nil, nil, nil, nil, nil],
+            battleship: [nil, nil, nil, nil],
+            cruiser:    [{1,1}, {2,1}, {3,1}],
+            submarine:  [nil, nil, nil],
+            destroyer:  [nil, nil]
+          },
+          status: %{{2,1} => "hit", {3, 4} => "miss"}
+        }},
+        board_size: %{ :width => 10, :height => 10 }
+      }
+    }
+
+  end
 
   # test "update score" do
   #   assert update_score(add_player(new(), "jj"), "jj", 3) == %{

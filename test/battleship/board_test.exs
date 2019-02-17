@@ -12,6 +12,26 @@ defmodule Battleship.BoardTest do
     }
   end
 
+  # Stinging ---------------------------------------------------------------------------------------
+
+  defp compare_status(board, key, expected) do
+    assert board.status[key] == expected
+  end
+
+  test "valid sting?" do
+    assert valid_sting?(new(), {3, 4})
+    assert !valid_sting?(update_status(new(), {3, 4}), {3, 4})
+  end
+
+  test "update status" do
+    compare_status(update_status(new(), {3,4}), {3,4}, "miss")
+
+    board = place_caterpillar(new(), :carrier, 3, 3, false)
+    compare_status(update_status(board, {3, 4}), {3, 4}, "hit")
+  end
+
+  # Placing ---------------------------------------------------------------------------------------
+
   defp compare_caterpillars(board, key, expected) do
     assert board.caterpillars[key] == expected
   end
@@ -41,14 +61,19 @@ defmodule Battleship.BoardTest do
   test "place caterpillars" do
     assert compare_caterpillars(place_caterpillar(new(), :destroyer, 0, 0, false), :destroyer, [{0,0}, {0, 1}])
     assert compare_caterpillars(place_caterpillar(new(), :carrier, 0, 0, true), :carrier, [{0,0}, {1, 0}, {2, 0}, {3, 0}, {4,0}])
+
+    # duplicate placement replaces previous value
+    board = place_caterpillar(new(), :destroyer, 0, 0, false)
+    assert compare_caterpillars(place_caterpillar(board, :destroyer, 2, 2, true), :destroyer, [{2, 2}, {3, 2}])
   end
 
   test "valid placement?" do
     assert valid_placement?(new(), 10, 10, :destroyer, 0, 0, true)
     assert valid_placement?(new(), 10, 10, :destroyer, 7, 7, true)
     assert valid_placement?(new(), 10, 10, :destroyer, 7, 7, false)
-    # duplicate placement replaces previous value
-    # assert valid_placement?()
+    # duplicate placement allowed (replaces previous value)
+    board = place_caterpillar(new(), :destroyer, 0, 0, false)
+    assert valid_placement?(board, 10, 10, :destroyer, 2, 2, false)
     # invalid if starts off board
     assert !valid_placement?(new(), 10, 10, :destroyer, 0, -1, true)
     assert !valid_placement?(new(), 10, 10, :destroyer, 0, -1, false)
@@ -56,7 +81,7 @@ defmodule Battleship.BoardTest do
     assert !valid_placement?(new(), 10, 10, :destroyer, 9, 9, true)
     assert !valid_placement?(new(), 10, 10, :destroyer, 9, 9, false)
     # invalid if intersects
-
+    # TODO
   end
 
   test "intersect?" do
