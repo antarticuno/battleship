@@ -64,7 +64,7 @@ defmodule Battleship.Game do
 
   # are players still placing pieces on their boards?
   def setup_done?(game) do
-    true # TODO
+    length(game.players) > 0 && Enum.all?(Map.values(game.boards), fn board -> Board.all_caterpillars_placed?(board) end)
   end
 
   def place_caterpillar(game, player_name, type, start_x, start_y, horizontal?) do

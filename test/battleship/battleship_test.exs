@@ -18,6 +18,24 @@ defmodule Battleship.BattleshipTest do
 
   # Set-Up Phase ----------------------------------------------------------------------------------
 
+  test "setup done?" do
+    # game with no players is not done setting up
+    assert !setup_done?(new())
+
+    game = add_player(new(), "marie")
+    {:ok, game} = place_caterpillar(game, "marie", :carrier, 0, 0, false)
+    {:ok, game} = place_caterpillar(game, "marie", :battleship, 1, 0, false)
+    {:ok, game} = place_caterpillar(game, "marie", :cruiser, 2, 0, false)
+    {:ok, game} = place_caterpillar(game, "marie", :submarine, 3, 0, false)
+    assert !setup_done?(game)
+    {:ok, game} = place_caterpillar(game, "marie", :destroyer, 4, 0, false)
+    assert setup_done?(game)
+
+    # all players must be done setting up
+    game = add_player(game, "brendan")
+    assert !setup_done?(game)
+  end
+
   test "place caterpillar" do
     assert place_caterpillar(add_player(new(), "brendan"), "brendan", :cruiser, 0, 0, true) == 
       {:ok, 
@@ -27,12 +45,12 @@ defmodule Battleship.BattleshipTest do
           turn: "brendan", 
           boards: %{ "brendan" => %{
             caterpillars: %{
-              carrier:    ["", "", "", "", ""],
-              battleship: ["","","",""],
+              carrier:    [nil, nil, nil, nil, nil],
+              battleship: [nil, nil, nil, nil],
               cruiser:    [{0,0}, {1,0}, {2,0}],
-              submarine:  ["", "", ""],
-              destroyer:  ["", ""]
-              },
+              submarine:  [nil, nil, nil],
+              destroyer:  [nil, nil]
+            },
             status: %{}
           }},
             board_size: %{ :width => 10, :height => 10 }

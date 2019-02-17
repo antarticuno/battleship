@@ -3,12 +3,12 @@ defmodule Battleship.Board do
   def new do
     %{
       caterpillars: %{
-        carrier:    ["", "", "", "", ""],
-        battleship: ["","","",""],
-        cruiser:    ["", "", ""],
-        submarine:  ["", "", ""],
-        destroyer:  ["", ""]
-        },
+        carrier:    [nil, nil, nil, nil, nil],
+        battleship: [nil, nil, nil, nil],
+        cruiser:    [nil, nil, nil],
+        submarine:  [nil, nil, nil],
+        destroyer:  [nil, nil]
+      },
       status: %{} # map from coordinate ("A6") to status ("hit" or "miss")
     }
   end
@@ -28,6 +28,11 @@ defmodule Battleship.Board do
         |> Map.put(:status, Map.put(status, target, "miss"))
       end
     end
+  end
+
+  def all_caterpillars_placed?(board) do
+    occupied_coordinates = List.flatten(Map.values(board.caterpillars))
+    Enum.all?(occupied_coordinates, fn c -> c != nil end)    
   end
 
   # ASSUMES: valid coordinates for the caterpillar type
