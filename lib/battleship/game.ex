@@ -4,7 +4,7 @@ defmodule Battleship.Game do
 
   def new do
     %{
-      player_names: [],
+      players: [],
       rankings: [], # player names in order of who lost later -> earlier
       turn: "",      # index of player whose turn it is
       # score: %{},   # { player_name: Nat }
