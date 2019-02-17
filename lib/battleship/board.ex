@@ -8,27 +8,36 @@ defmodule Battleship.Board do
         cruiser:    [nil, nil, nil],
         submarine:  [nil, nil, nil],
         destroyer:  [nil, nil]
-      },
-      status: %{} # map from coordinate ("A6") to status ("hit" or "miss")
+        },
+      status: %{} # map from coordinate {x, y} to status ("hit" or "miss")
     }
   end
 
   def client_board(board), do: board.status
 
-  def update_board(board, target) do
-    status = board.status
-    if (Map.has_key?(status, target)) do
-      board #TODO do we be nice? or just return the board
+  # Stinging ---------------------------------------------------------------------------------------
+
+  # target = {x, y}
+  def valid_sting?(board, target), do: !Map.has_key?(board.status, target)
+
+  # ASSUMES: target hasn't been stung already
+  def update_status(board, target) do
+    if hit?(board, target) do
+      Map.put(board, :status, Map.put(board.status, target, "hit"))
     else
-      if hit?(board, target) do
-        board
-        |> Map.put(:status, Map.put(status, target, "hit"))
-      else
-        board
-        |> Map.put(:status, Map.put(status, target, "miss"))
-      end
+      Map.put(board, :status, Map.put(board.status, target, "miss"))
     end
   end
+
+  # ASSUMES: target hasn't been stung already
+  defp hit?(board, target) do
+    status = board.status
+    board.caterpillars
+    |> Map.values
+    |> Enum.reduce(false, &(Enum.member?(&1, target) or &2))
+  end
+
+  # Placing ---------------------------------------------------------------------------------------
 
   def all_caterpillars_placed?(board) do
     occupied_coordinates = List.flatten(Map.values(board.caterpillars))
@@ -93,22 +102,16 @@ defmodule Battleship.Board do
     end
   end
 
-  # ASSUMES: sting hasn't been made already
-  defp hit?(board, target) do
-    status = board.status
-    board.caterpillars
-    |> Map.values
-    |> Enum.reduce(false, &(Enum.member?(&1, target) or &2))
-  end
+  # Status ----------------------------------------------------------------------------------------
 
   defp dead?(caterpillar, status) do
     caterpillar
-    |> Enum.reduce(true, &(Map.get(status, &1) == "hit"))
+    |> Enum.all?(&(Map.get(status, &1) == "hit"))
   end
 
   def lost?(board) do
     board.caterpillars
     |> Map.values
-    |> Enum.reduce(true, &(dead?(&1, board.status)))
+    |> Enum.all?(&(dead?(&1, board.status)))
   end
 end
