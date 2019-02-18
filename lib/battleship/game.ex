@@ -14,6 +14,20 @@ defmodule Battleship.Game do
     }
   end
 
+  def client_view(game) do
+    boards = game.boards
+             |> Enum.map(fn {pn, board} -> {pn, Board.client_board(board)} end)
+    %{
+       my_board: game.boards[0] |> Map.new,
+       opponents: game.boards |> Map.new,
+       my_turn: true,
+       lost: false,
+       board_size: game.board_size,
+       rankings: game.rankings,
+       phase: get_game_phase(game),
+     }
+  end
+
   def client_view(game, player_name) do
     {me, opponents} = Map.split(game.boards, [player_name])
     %{
@@ -114,11 +128,6 @@ defmodule Battleship.Game do
   #   {y, _} = Integer.parse(y)
   #   <<65+x>> <> y
   # end 
-
-  # ASSUMES: current player is the one doing the guessing
-  def guess(game, target, coordinate) do
-    game #TODO delete and use sting in games_channel instead
-  end
 
   def next_player(game) do
     remaining_players = remaining_players(game)
