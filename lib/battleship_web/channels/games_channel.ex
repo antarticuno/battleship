@@ -3,48 +3,64 @@ defmodule BattleshipWeb.GamesChannel do
 
   alias Battleship.Game
   alias Battleship.BackupAgent
+  alias Battleship.GameServer
 
   def join("games:" <> game_name, payload, socket) do
     player_name = Map.get(payload, "player_name")
-
+    game = BackupAgent.get(game_name) || Game.new()
+  
     if authorized?(game_name, player_name) do
-      game = BackupAgent.get(game_name) || Game.new()
+      game = Game.add_player(game, player_name)
+
       socket = socket
       |> assign(:game, game)
-      |> assign(:name, game_name)
+      |> assign(:user, player_name) # TODO risky??
+
       BackupAgent.put(game_name, game)
-      {:ok, %{"join" => game_name, "game" => Game.client_view(game, player_name)}, socket}
+
+      view = Game.client_view(game, player_name)
+      send(self, :after_join)
+
+      {:ok, %{"join" => game_name, "game" => view}, socket}
+      # {:ok, socket}
     else
       {:error, %{reason: "unauthorized"}}
     end
   end
 
-  #TODO fill out these handle_ins
-  def handle_in("new", _payload, socket) do
-    
+  def handle_info(:after_join, socket) do
+    view = Game.client_view(socket.assigns[:game], socket.assigns[:user])
+    broadcast socket, "update_view", view
+    # push(socket, "update_view", view)
+    {:noreply, socket}
   end
 
-  def handle_in("sting", payload, socket) do
-    name = socket.assigns[:name]
-    game = GameServer.guess()
-    player_name = "TODO"
-    {:reply, {:waiting, %{"game" => Game.client_view(game, player_name)}}, socket}
+  def handle_out("update_view", payload, socket) do
+    IO.puts "HELPHELPHELP"
+    {:ok, %{"game" => payload}, socket}
   end
 
-  def handle_in("place", payload, socket) do
+  # def handle_in("sting", payload, socket) do
+  #   name = socket.assigns[:name]
+  #   game = GameServer.guess()
+  #   player_name = "TODO"
+  #   {:reply, {:waiting, %{"game" => Game.client_view(game, player_name)}}, socket}
+  # end
 
-  end
+  # def handle_in("place", payload, socket) do
 
-  defp update_state(socket, game) do
-     name = socket.assigns[:name]
-     socket = assign(socket, :game, game)
-     BackupAgent.put(name, game)
-     {:reply, {:ok, %{ "game" => Game.client_view(game)}}, socket}
-   end
+  # end
+
+  # defp update_state(socket, game) do
+  #    name = socket.assigns[:name]
+  #    socket = assign(socket, :game, game)
+  #    BackupAgent.put(name, game)
+  #    {:reply, {:ok, %{ "game" => Game.client_view(game)}}, socket}
+  #  end
 
   defp authorized?(game_name, player_name) do
-    # TODO check if player name trying to get into the right game
-    # ie: game is not full OR player is already in that game and re-connecting
+    # game is not full OR player is already in that game and re-connecting
+    # Game.waiting_for_players?(game) || Game.has_player?(game, player_name)
     true
   end
 end

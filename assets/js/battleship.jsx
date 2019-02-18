@@ -35,16 +35,16 @@ class Battleship extends React.Component {
     console.log("state", this.state);
     switch (this.state.phase) {
       case "joining":
-	      this.renderJoining();
+	      return this.renderJoining();
         break;
       case "setup":
-        this.renderSetup();
+        return this.renderSetup();
         break;
       case "playing":
-        this.renderPlaying();
+        return this.renderPlaying();
         break;
       case "gameover":
-	      this.renderGameOver();
+	      return this.renderGameOver();
         break;
       default:
 	      return (<div className="container">Waiting for next phase...</div>);
@@ -52,7 +52,6 @@ class Battleship extends React.Component {
   }
 
   gotView(view) {
-    console.log(view.game);
     this.setState(view.game);
   }
 
@@ -95,8 +94,8 @@ class Battleship extends React.Component {
                 <option value="submarine">Submarine</option>
                 <option value="destroyer">Destroyer</option>
               </select>
-              Start X: <input type="text" maxlength={this.state.boardSize.width} />
-              Start Y: <input type="text" maxlength={this.state.boardSize.height} />
+              Start X: <input type="text" maxLength={this.state.boardSize.width} />
+              Start Y: <input type="text" maxLength={this.state.boardSize.height} />
               Direction: <select>
               <option value="true">Horizontal</option>
               <option value="false">Vertical</option>
