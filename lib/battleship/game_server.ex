@@ -20,18 +20,29 @@ defmodule Battleship.GameServer do
     GameSup.start_child(spec)
   end
 
+  def get_game(name, state) do
+    Map.get(state, name, Game.new())
+  end
+
   def start_link(name) do
-    game = Battleship.BackupAgent.get(name) || Battleship.Game.new()
+    game = Battleship.BackupAgent.get(name) || Game.new()
     GenServer.start_link(__MODULE__, game, name: reg(name))
   end
 
-  def guess(name, coordinate) do
-    GenServer.call(reg(name), {:guess, name, coordinate})
+  # TODO make sure to have a handle_call sting
+  def sting(game_name, coordinate, user_name, coordinate) do
+    GenServer.call(__MODULE__, {:sting, game_name, user_name, coordinate})
   end
 
-  def peek(name) do
-    GenServer.call(reg(name), {:peek, name})
+  # TODO place
+  def place(game_name, coordinate, direction, user_name) do
+    GenServer.call(__MODULE__, {:place, name})
   end
+
+  def join(game_name, user_name) do
+    GenServer.cast(__MODULE__, {:join, game_name, user_name})
+  end
+
 
   # Server Logic
 
@@ -39,10 +50,15 @@ defmodule Battleship.GameServer do
     {:ok, game}
   end
 
-  # TODO:
-  # use broadcast function from Endpoint API to send the updated state to all
-  def handle_call({:sting, name, target, coordinate}, _from, game) do
-    game = Game.guess(game, target, coordinate)
+  def handle_cast({:join, game_name, user_name}, _from, state) do
+    game = Game.add_player(get_game(game_name, state), user_name)
+    broadcast(Game.client_view(game))
+    {:noreply, Map.put(state, game_name, game)}
+  end
+
+  def handle_call({:sting, game_name, opponent, target}, _from, state) do
+    game = Game.sting(game, target, coordinate)
+    broadcast(Game.client_view(game))
     Battleship.BackupAgent.put(name, game)
     {:reply, game, game}
   end
@@ -53,7 +69,14 @@ defmodule Battleship.GameServer do
   end
 
   # TODO
-  def handle_call({:place, name, target, coordinate}, from, game) do
-  
+  def handle_call({:place, user_name, start_x, start_y, direction}, _from, game) do
+    game = Game.place_caterpillar(game, user_name, type, start_x, start_y, direction)
+    Battleship.BackupAgent.put(name, game)
+    broadcast(Game.client_view(game))
+    {:reply, game, game}
+  end
+
+  defp broadcast(state, game_name) do
+    Battleship.Endpoint.broadcast("games:" <> game_name, "update_view", state)
   end
 end
