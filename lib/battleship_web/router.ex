@@ -3,6 +3,7 @@ defmodule BattleshipWeb.Router do
 
   pipeline :browser do
     plug :accepts, ["html"]
+    plug BattleshipWeb.Plugs.FetchSession, []
     plug :fetch_session
     plug :fetch_flash
     plug :protect_from_forgery
@@ -18,9 +19,10 @@ defmodule BattleshipWeb.Router do
 
     get "/", PageController, :index
     get "/game", PageController, :redirect_to_index
-    get "/game/:name", PageController, :observe
-    get "/game/:name/:player_name", PageController, :game
-    post "/game", PageController, :join_game
+    # get "/game/:name", PageController, :observe
+    get "/game/:name", PageController, :game
+    post "/game", PageController, :game
+    resources "/sessions", SessionController, only: [:create, :delete], singleton: true
   end
 
   # Other scopes may use custom stacks.

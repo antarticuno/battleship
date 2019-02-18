@@ -9,13 +9,9 @@ defmodule BattleshipWeb.PageController do
     redirect(conn, to: "/")
   end
 
-  def observe(conn, %{"name" => name}) do
-    render conn, "game.html", %{name: name, player_name: nil}
-  end
+  # def observe(conn), do: render conn, "game.html", %{name: name, player_name: nil}
 
-  def game(conn, %{"name" => name, "player_name" => player_name}) do
-    render conn, "game.html", %{name: name, player_name: player_name}
-  end
+  def game(conn, _name), do: render conn, "game.html"
 
   def join_game(conn, %{"name" => name, "player_name" => player_name}) do
     redirect(conn, to: "/game/" <> name <> "/" <> player_name)

@@ -1,13 +1,13 @@
 <script>
-  window.gameName = "<%= @name %>";
-  window.playerName = "<%= @player_name %>";
+  window.gameName = "<%= Plug.Conn.get_session(@conn, :name) %>";
+  window.playerName = "<%= Plug.Conn.get_session(@conn, :player_name) %>";
 </script>
 
  <div class="row">
   <div class="column">
-    <h2>Battleship: <%= @name %></h2>
-    <%= if @player_name do %>
-      <h4>Playing as: <%= @player_name %></h4>
+    <h2>Battleship: <%= Plug.Conn.get_session(@conn, :name) %></h2>
+    <%= if Plug.Conn.get_session(@conn, :player_name) do %>
+      <h4>Playing as: <%= Plug.Conn.get_session(@conn, :player_name) %></h4>
     <% else %>
       <h4>Observing...</h4>
     <% end %>
