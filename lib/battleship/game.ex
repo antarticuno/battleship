@@ -116,6 +116,10 @@ defmodule Battleship.Game do
       game = game
       |> set_player_board(opponent, board)
       |> next_player
+
+      if (game_over?(game)) do
+        game = Map.put(game, :rankings, [game.turn | Map.get(game, :rankings)])
+      end
       {:ok, game}  
     else
       {:error, game}
