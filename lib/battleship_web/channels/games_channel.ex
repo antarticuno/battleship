@@ -59,9 +59,6 @@ defmodule BattleshipWeb.GamesChannel do
         broadcast socket, "error", Game.client_view(game, socket.assigns[:user])
         {:error, %{reason: g}}
       end
-      {:noreply, socket}  
-      
-       
        
      else
        {:error, %{reason: "No player for place"}}

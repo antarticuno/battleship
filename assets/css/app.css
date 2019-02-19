@@ -2,6 +2,15 @@
 
 @import "~milligram/dist/milligram";
 
+.inline {
+  display: inline-block;
+  margin-right: 20px;
+}
+
 .caterpillar {
   background-color: #ddd;
+}
+
+.sting {
+  margin-top: 20px;
 }

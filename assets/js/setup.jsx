@@ -1,8 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import PropTypes from 'prop-types';
 import _ from 'lodash';
-import $ from 'jquery';
 
 export default class SetUpForm extends React.Component {
   constructor(props) {
@@ -31,21 +29,11 @@ export default class SetUpForm extends React.Component {
   }
 
   handleXChange(ev) {
-    this.setState({startX: this.normalizeCoordinate(ev.target.value, true)});
+    this.setState({startX: normalizeCoordinate(ev.target.value, true, this.props.maxX, this.props.maxY)});
   }
 
   handleYChange(ev) {
-    this.setState({startY: this.normalizeCoordinate(ev.target.value, false)});
-  }
-
-  normalizeCoordinate(c, isX) {
-    let coordinate = c < 0 ? 0 : c;
-    if (isX) {
-      coordinate = coordinate > this.props.maxX ? this.props.maxX : coordinate;
-    } else {
-      coordinate = coordinate > this.props.maxY ? this.props.maxY : coordinate;
-    }
-    return coordinate;
+    this.setState({startY: normalizeCoordinate(ev.target.value, false, this.props.maxX, this.props.maxY)});
   }
 
   handleDirectionChange(ev) {
@@ -74,4 +62,14 @@ export default class SetUpForm extends React.Component {
       </form>
     );
   }
+}
+
+export function normalizeCoordinate(c, isX, maxX, maxY) {
+  let coordinate = c < 0 ? 0 : c;
+  if (isX) {
+    coordinate = coordinate > maxX ? maxX : coordinate;
+  } else {
+    coordinate = coordinate > maxY ? maxY : coordinate;
+  }
+  return coordinate;
 }
