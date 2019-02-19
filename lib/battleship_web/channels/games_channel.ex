@@ -42,9 +42,20 @@ defmodule BattleshipWeb.GamesChannel do
   #   {:reply, {:waiting, %{"game" => Game.client_view(game, player_name)}}, socket}
   # end
 
-  # def handle_in("place", payload, socket) do
-
-  # end
+  def handle_in("place", %{"player_name" => player_name, "type" => type,
+                "start_x" => start_x, "start_y" => start_y,
+                "horizontal?" => horizontal}, socket) do
+     if (Map.has_key?(player_name)) do
+       # TODO make sure the types match place_caterpillar
+       game = socket.assigns[:game]
+              |> Game.place_caterpillar(player_name, type, start_x, start_y, horizontal)
+       BackupAgent.put(socket.assigns[:name], game)
+       broadcast socket, "update_view", Game.client_view(socket.assigns[:game], socket.assigns[:user])
+       {:reply, {:ok, %{"game" => Game.client_view(game)}}, socket}
+     else
+       {:error, %{reason: "no player for place"}}
+     end
+  end
 
   # defp update_state(socket, game) do
   #    name = socket.assigns[:name]
