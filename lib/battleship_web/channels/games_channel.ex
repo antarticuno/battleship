@@ -13,13 +13,15 @@ defmodule BattleshipWeb.GamesChannel do
       game = Game.add_player(game, player_name)
 
       socket = socket
+      |> assign(:game_name, game_name)
       |> assign(:game, game)
       |> assign(:user, player_name) # TODO risky??
 
       BackupAgent.put(game_name, game)
 
       view = Game.client_view(game, player_name)
-      send(self, :after_join)
+
+      send(self, :after_join) # self is a pid = socket.channel_pid
 
       {:ok, %{"join" => game_name, "game" => view}, socket}
       # {:ok, socket}
@@ -31,13 +33,7 @@ defmodule BattleshipWeb.GamesChannel do
   def handle_info(:after_join, socket) do
     view = Game.client_view(socket.assigns[:game], socket.assigns[:user])
     broadcast socket, "update_view", view
-    # push(socket, "update_view", view)
     {:noreply, socket}
-  end
-
-  def handle_out("update_view", payload, socket) do
-    IO.puts "HELPHELPHELP"
-    {:ok, %{"game" => payload}, socket}
   end
 
   # def handle_in("sting", payload, socket) do

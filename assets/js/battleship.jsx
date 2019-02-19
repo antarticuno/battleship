@@ -1,6 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import _ from 'lodash';
+import $ from 'jquery';
 
 export default function game_init(root, channel) {
   ReactDOM.render(<Battleship channel={channel} />, root);
@@ -12,14 +13,20 @@ class Battleship extends React.Component {
     this.channel = props.channel;
 
     this.state = {
-	    myBoard: {},
+	    my_board: {},
 	    opponents: {},
-	    myTurn: "",
+	    my_turn: "",
 	    lost: false,
-	    boardSize: {},
+	    board_size: {},
 	    rankings: [],         // array of names of players who have lost
 	    phase: "joining",     // joining, setup, playing, gameover phases
     }
+
+    this.channel
+      //.on("update_view", payload => {this.setState(payload.game)})
+      //.on("update_view", payload => {this.gotView(payload)})
+      //.on("update_view", payload => {this.forceUpdate.bind(this)})
+      .on("update_view", payload => {console.log(payload)})
 
     this.channel
       .join()
@@ -94,8 +101,8 @@ class Battleship extends React.Component {
                 <option value="submarine">Submarine</option>
                 <option value="destroyer">Destroyer</option>
               </select>
-              Start X: <input type="text" maxLength={this.state.boardSize.width} />
-              Start Y: <input type="text" maxLength={this.state.boardSize.height} />
+              Start X: <input type="text" maxLength={this.state.board_size.width} />
+              Start Y: <input type="text" maxLength={this.state.board_size.height} />
               Direction: <select>
               <option value="true">Horizontal</option>
               <option value="false">Vertical</option>
@@ -104,7 +111,7 @@ class Battleship extends React.Component {
           </form>
         </div>
         <div className="col">
-          <PlayerBoard myBoard={this.state.myBoard}/>
+          <PlayerBoard myBoard={this.state.my_board}/>
         </div>
       </div>
     </div>
