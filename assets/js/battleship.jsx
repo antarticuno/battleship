@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom';
 import PropTypes from 'prop-types';
 import _ from 'lodash';
 import $ from 'jquery';
-import SetupForm from './setup.js';
+import SetupForm from './setup';
 
 export default function game_init(root, channel) {
   ReactDOM.render(<Battleship channel={channel} />, root);
@@ -34,13 +34,15 @@ class Battleship extends React.Component {
   }
 
   on_place(type, startX, startY, isHorizontal) {
-    this.channel.push("place", {
+    let place = {
       "player_name": window.playerName, 
       "type": type, 
       "start_x": startX,
       "start_y": startY,
       "horizontal?": isHorizontal 
-    });
+    };
+    console.log(place);
+    this.channel.push("place", place);
   }
 
   render() {
@@ -107,8 +109,8 @@ class Battleship extends React.Component {
         </div>
           <div className="column">
             <SetupForm 
-              maxLengthX={this.state.board_size.width}
-              maxLengthY={this.state.board_size.height}
+              maxX={this.state.board_size.width}
+              maxY={this.state.board_size.height}
               onSubmit={this.on_place.bind(this)}
             />
         </div>

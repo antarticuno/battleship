@@ -17,7 +17,8 @@ export default class SetUpForm extends React.Component {
 
     this.handleCaterpillarChange = this.handleCaterpillarChange.bind(this);
     this.handleDirectionChange = this.handleDirectionChange.bind(this);
-    this.handleCoordinateChange = this.handleCoordinateChange.bind(this);
+    this.handleXChange = this.handleXChange.bind(this);
+    this.handleYChange = this.handleYChange.bind(this);
   }
 
   onSubmit(ev) {
@@ -29,16 +30,25 @@ export default class SetUpForm extends React.Component {
     this.setState({caterpillar: ev.target.value});
   }
 
-  handleCoordinateChange(ev, isX) {
+  handleXChange(ev) {
+    this.setState({startX: this.normalizeCoordinate(ev.target.value, true)});
+  }
+
+  handleYChange(ev) {
+    this.setState({startY: this.normalizeCoordinate(ev.target.value, false)});
+  }
+
+  normalizeCoordinate(c, isX) {
+    let coordinate = c < 0 ? 0 : c;
     if (isX) {
-      this.setState({startX: ev.target.value});
+      coordinate = coordinate > this.props.maxX ? this.props.maxX : coordinate;
     } else {
-      this.setState({startY: ev.target.value})
+      coordinate = coordinate > this.props.maxY ? this.props.maxY : coordinate;
     }
+    return coordinate;
   }
 
   handleDirectionChange(ev) {
-    console.log("handle direction");
     this.setState({isHorizontal: ev.target.value})
   }
 
@@ -53,8 +63,8 @@ export default class SetUpForm extends React.Component {
           <option value="submarine">Submarine</option>
           <option value="destroyer">Destroyer</option>
         </select>
-        Start X: <input type="number" min={1} max={this.props.maxLengthX} />
-        Start Y: <input type="number" min={1} max={this.props.maxLengthY} />
+        Start X: <input type="number" min={1} max={this.props.maxX} onChange={this.handleXChange} />
+        Start Y: <input type="number" min={1} max={this.props.maxY} onChange={this.handleYChange} />
         Direction: 
         <select value={this.state.isHorizontal} onChange={this.handleDirectionChange}>
           <option value="true">Horizontal</option>
