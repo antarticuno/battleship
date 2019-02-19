@@ -2,6 +2,8 @@
 
 @import "~milligram/dist/milligram";
 
+/* TODO: mobile styling */
+
 button.disabled {
   pointer-events: none;
   background-color: #606c76;
@@ -15,6 +17,10 @@ button.disabled {
 
 .board-cell {
   text-align: center;
+}
+
+.board-cell.label {
+  font-weight: 400;
 }
 
 .board-cell.caterpillar {

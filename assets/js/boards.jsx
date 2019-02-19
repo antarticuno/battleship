@@ -40,19 +40,28 @@ function Board(props) {
   let status = props.status;
   let caterpillars = _.filter(props.caterpillarCoords, null);
   let cols = [];
-  for (let c = 0; c < props.width; c++) {
+  for (let c = -1; c < props.width; c++) {
     let col = [];
-    for (let r = 0; r < props.height; r++) {
-      let coord = r + "," + c;
-      let s = props.status[coord];
-      
-      let isHit = s == "hit";
-      let isMiss = s == "miss";
-      let hit = isHit ? " hit" : isMiss ? " miss" : "";
+    for (let r = -1; r < props.height; r++) {
 
-      col.push(<div key={r} className={coord + " column board-cell" + (caterpillars.includes(coord) ? " caterpillar" : "") + hit}>
+      if (c == -1 && r == -1) {
+        col.push(<div className="column board-cell label"></div>);
+      } else if (c == -1) {
+        col.push(<div className="column board-cell label">{r}</div>);
+      } else if (r == -1) {
+        col.push(<div className="column board-cell label">{c}</div>);
+      } else {
+        let coord = r + "," + c;
+        let s = props.status[coord];
+        
+        let isHit = s == "hit";
+        let isMiss = s == "miss";
+        let hit = isHit ? " hit" : isMiss ? " miss" : "";
+
+        col.push(<div key={r} className={coord + " column board-cell" + (caterpillars.includes(coord) ? " caterpillar" : "") + hit}>
           {isHit ? "X" : isMiss ? "O" : "_"}
         </div>);
+      }
     }
     cols.push(<div key={c} className="row">{col}</div>);
   }
