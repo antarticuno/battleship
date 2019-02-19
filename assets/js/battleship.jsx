@@ -1,6 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import _ from 'lodash';
+import $ from 'jquery';
 
 export default function game_init(root, channel) {
   ReactDOM.render(<Battleship channel={channel} />, root);
@@ -12,11 +13,11 @@ class Battleship extends React.Component {
     this.channel = props.channel;
 
     this.state = {
-	    myBoard: {},
+	    my_board: {},
 	    opponents: {},
-	    myTurn: "",
+	    my_turn: "",
 	    lost: false,
-	    boardSize: {},
+	    board_size: {},
 	    rankings: [],         // array of names of players who have lost
 	    phase: "joining",     // joining, setup, playing, gameover phases
     }
@@ -25,6 +26,9 @@ class Battleship extends React.Component {
       .join()
       .receive("ok", this.gotView.bind(this))
       .receive("error", resp => { console.error("Unable to join", resp); });
+
+    this.channel
+      .on("update_view", this.gotView.bind(this));
   }
 
   on_place(ev) {
@@ -34,64 +38,85 @@ class Battleship extends React.Component {
   render() {
     switch (this.state.phase) {
       case "joining":
-	return (<div className="container">Waiting for other players to join...</div>);
+	      return this.renderJoining();
+        break;
       case "setup":
-        return (
-	  <div className="container">
-	    <div className="row">
-	      <div className="col">
-              <form>
-		  Caterpillar: <select name="caterpillar">
-		    <option value="carrier">Carrier</option>
-		    <option value="battleship">Battleship</option>
-		    <option value="cruiser">Cruiser</option>
-		    <option value="submarine">Submarine</option>
-		    <option value="destroyer">Destroyer</option>
-		  </select>
-		  Start X: <input type="text" maxlength={this.state.boardSize.width} />
-		  Start Y: <input type="text" maxlength={this.state.boardSize.height} />
-		  Direction: <select>
-		    <option value="true">Horizontal</option>
-		    <option value="false">Vertical</option>
-		  </select>
-	          <button onClick={this.on_place.bind(this)}>Place!</button>
-	        </form>
-	      </div>
-	      <div className="col">
-		<PlayerBoard myBoard={this.state.myBoard}/>
-	      </div>
-	    </div>
-	  </div>
-	);
+        return this.renderSetup();
+        break;
       case "playing":
-        return (
-          <div className="container">
-            <div className="row">
-              <div className="col">
-                <EnemyBoards />
-              </div>
-	      <div className="col">
-	        <div className="row">
-	          <div className="col">
-	            <PlayerInput />
-	          </div>
-	          <div className="col">
-	            <PlayerBoard />
-	          </div>
-  	        </div>
-	      </div>
-            </div>
-          </div>
-        );
+        return this.renderPlaying();
+        break;
       case "gameover":
-	return (<ScoreBoard rankings={this.state.rankings} />);
+	      return this.renderGameOver();
+        break;
       default:
-	return (<div className="container">Waiting for next phase...</div>);
+	      return (<div className="container">Waiting for next phase...</div>);
     }
   }
 
   gotView(view) {
-    this.setState(view.game);
+    console.log("got_view", view);
+    this.setState(view);
+  }
+
+  renderJoining() {
+    return (<div className="container">Waiting for other players to join...</div>);
+  }
+
+  renderPlaying() {
+    return (
+      <div className="container">
+        <div className="row">
+          <div className="col">
+            <EnemyBoards />
+          </div>
+          <div className="col">
+            <div className="row">
+              <div className="col">
+                <PlayerInput />
+              </div>
+              <div className="col">
+                <PlayerBoard />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  renderSetup() {
+    return (
+      <div className="container">
+        <div className="row">
+          <div className="col">
+            <form>
+              Caterpillar: <select name="caterpillar">
+                <option value="carrier">Carrier</option>
+                <option value="battleship">Battleship</option>
+                <option value="cruiser">Cruiser</option>
+                <option value="submarine">Submarine</option>
+                <option value="destroyer">Destroyer</option>
+              </select>
+              Start X: <input type="text" maxLength={this.state.board_size.width} />
+              Start Y: <input type="text" maxLength={this.state.board_size.height} />
+              Direction: <select>
+              <option value="true">Horizontal</option>
+              <option value="false">Vertical</option>
+            </select>
+            <button onClick={this.on_place.bind(this)}>Place!</button>
+          </form>
+        </div>
+        <div className="col">
+          <PlayerBoard myBoard={this.state.my_board}/>
+        </div>
+      </div>
+    </div>
+    );
+  }
+
+  renderGameOver() {
+    return (<ScoreBoard rankings={this.state.rankings} />);
   }
 }
 

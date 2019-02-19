@@ -69,13 +69,19 @@ defmodule Battleship.Game do
 
   # Joining Game  ---------------------------------------------------------------------------------
 
-  # ASSUMES: no duplicate player_names
   def add_player(game, player_name) do
-    game 
-    |> Map.put(:players, [player_name | game.players])
-    |> Map.put(:turn, player_name) # TODO only add first player to join?
-    # |> Map.put(:score, Map.put(game.score, player_name, 0))
-    |> Map.put(:boards, Map.put(game.boards, player_name, Board.new()))
+    if (has_player?(game, player_name)) do
+      game
+    else
+      game 
+      |> Map.put(:players, [player_name | game.players])
+      |> Map.put(:turn, player_name) # TODO only add first player to join?
+      |> Map.put(:boards, Map.put(game.boards, player_name, Board.new()))
+    end    
+  end
+
+  def has_player?(game, player_name) do
+    Enum.member?(game.players, player_name)
   end
 
   def waiting_for_players?(game), do: length(game.players) < @num_players
@@ -125,13 +131,6 @@ defmodule Battleship.Game do
       {:error, game}
     end
   end
-  
-  # # (3, 4) => "D4"
-  # defp stringify_posn(x, y) do
-  #   {x, _} = Integer.parse(x)
-  #   {y, _} = Integer.parse(y)
-  #   <<65+x>> <> y
-  # end 
 
   def next_player(game) do
     remaining_players = remaining_players(game)
