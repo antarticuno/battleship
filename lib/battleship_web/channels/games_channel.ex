@@ -8,7 +8,7 @@ defmodule BattleshipWeb.GamesChannel do
   def join("games:" <> game_name, payload, socket) do
     player_name = Map.get(payload, "player_name")
     game = BackupAgent.get(game_name) || Game.new()
-  
+
     if authorized?(game_name, player_name) do
       game = Game.add_player(game, player_name)
 
@@ -42,18 +42,29 @@ defmodule BattleshipWeb.GamesChannel do
   #   {:reply, {:waiting, %{"game" => Game.client_view(game, player_name)}}, socket}
   # end
 
-  def handle_in("place", %{"player_name" => player_name, "type" => type,
-                "start_x" => start_x, "start_y" => start_y,
-                "horizontal?" => horizontal}, socket) do
-     if (Map.has_key?(player_name)) do
+  def handle_in("place", %{ "player_name" => player_name, "type" => type,
+    "start_x" => start_x, "start_y" => start_y, "horizontal?" => horizontal}, socket) do
+
+    game = socket.assigns[:game]
+    if (Game.has_player?(game, player_name)) do
        # TODO make sure the types match place_caterpillar
-       game = socket.assigns[:game]
-              |> Game.place_caterpillar(player_name, type, start_x, start_y, horizontal)
-       BackupAgent.put(socket.assigns[:name], game)
-       broadcast socket, "update_view", Game.client_view(socket.assigns[:game], socket.assigns[:user])
-       {:reply, {:ok, %{"game" => Game.client_view(game)}}, socket}
+      {result, g} = Game.place_caterpillar(game, player_name, String.to_atom(type), start_x, start_y, horizontal)
+      IO.inspect(g)
+      if (result == :ok) do
+        BackupAgent.put(socket.assigns[:name], g)     
+        broadcast socket, "update_view", Game.client_view(g, player_name)
+
+        {:reply, {:ok, %{"game" => Game.client_view(g, player_name)}}, socket}
+      else
+        broadcast socket, "error", Game.client_view(game, socket.assigns[:user])
+        {:error, %{reason: g}}
+      end
+      {:noreply, socket}  
+      
+       
+       
      else
-       {:error, %{reason: "no player for place"}}
+       {:error, %{reason: "No player for place"}}
      end
   end
 
@@ -65,7 +76,7 @@ defmodule BattleshipWeb.GamesChannel do
   #  end
 
   defp authorized?(game_name, player_name) do
-    # game is not full OR player is already in that game and re-connecting
+    # TODO game is not full OR player is already in that game and re-connecting
     # Game.waiting_for_players?(game) || Game.has_player?(game, player_name)
     true
   end

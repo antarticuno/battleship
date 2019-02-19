@@ -29,17 +29,17 @@ class Battleship extends React.Component {
       .receive("ok", this.gotView.bind(this))
       .receive("error", resp => { console.error("Unable to join", resp); });
 
-    this.channel
-      .on("update_view", this.gotView.bind(this));
+    this.channel.on("update_view", this.gotView.bind(this));
+    this.channel.on("error", err => { console.error(err); });
   }
 
   on_place(type, startX, startY, isHorizontal) {
     let place = {
       "player_name": window.playerName, 
       "type": type, 
-      "start_x": startX,
-      "start_y": startY,
-      "horizontal?": isHorizontal 
+      "start_x": _.parseInt(startX),
+      "start_y": _.parseInt(startY),
+      "horizontal?": (isHorizontal == "true")
     };
     console.log(place);
     this.channel.push("place", place);

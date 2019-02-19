@@ -13,7 +13,37 @@ defmodule Battleship.Board do
     }
   end
 
-  def client_board(board), do: board.status
+  def client_my_board(board) do
+    caterpillars = board.caterpillars
+    |> Enum.map(fn {k, coords} -> {k, convert_caterpillar(coords)} end)
+    |> Map.new()
+
+    board
+    |> Map.put(:caterpillars, caterpillars)
+    |> Map.put(:status, convert_status(board.status))
+  end
+
+  def client_opponent_board(board) do 
+    convert_status(board.status)
+  end
+
+  defp convert_status(status) do
+    status
+    |> Enum.map(fn {coord, stat} -> {convert_coordinate(coord), stat} end)
+    |> Map.new()
+  end
+
+  defp convert_caterpillar(coords) do
+    IO.inspect(coords)
+    coords
+    |> Enum.map(fn c -> (if c == nil, do: nil, else: convert_coordinate(c)) end)
+    |> Enum.to_list()
+  end
+
+  defp convert_coordinate(coordinate) do
+    {x, y} = coordinate
+    Integer.to_string(x) <> "," <> Integer.to_string(y)
+  end
 
   # Stinging ---------------------------------------------------------------------------------------
 

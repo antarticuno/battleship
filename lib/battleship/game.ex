@@ -14,26 +14,12 @@ defmodule Battleship.Game do
     }
   end
 
-  # def client_view(game) do
-  #   boards = game.boards
-  #            |> Enum.map(fn {pn, board} -> {pn, Board.client_board(board)} end)
-  #   %{
-  #      my_board: game.boards[0] |> Map.new,
-  #      opponents: game.boards |> Map.new,
-  #      my_turn: true,
-  #      lost: false,
-  #      board_size: game.board_size,
-  #      rankings: game.rankings,
-  #      phase: get_game_phase(game),
-  #    }
-  # end
-
   def client_view(game, player_name) do
     {me, opponents} = Map.split(game.boards, [player_name])
     %{
-      my_board: Map.get(me, player_name), # Board
+      my_board: Board.client_my_board(Map.get(me, player_name)), # Board
       opponents: opponents
-                  |> Enum.map(fn {pn, board} -> {pn, Board.client_board(board)} end)
+                  |> Enum.map(fn {pn, board} -> {pn, Board.client_opponent_board(board)} end)
                   |> Map.new,  # Map from player_name to Board status
       my_turn: game.turn == player_name,               
       lost: Enum.member?(game.rankings, player_name),

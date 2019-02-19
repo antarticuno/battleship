@@ -5,7 +5,7 @@ defmodule Battleship.BattleshipTest do
 
   test "client view" do
     assert client_view(add_player(new(), "nat tuck"), "nat tuck") == %{
-      my_board: Board.new(),
+      my_board: Board.client_my_board(Board.new()),
       opponents: %{},
       my_turn: true,
       lost: false,
@@ -15,13 +15,34 @@ defmodule Battleship.BattleshipTest do
     }
 
     assert client_view(add_player(add_player(new(), "nat tuck"), "brendan"), "nat tuck") == %{
-      my_board: Board.new(),
+      my_board: Board.client_my_board(Board.new()),
       opponents: %{"brendan" => %{}},
       my_turn: false,
       lost: false,
       board_size: %{ height: 10, width: 10 },
       rankings: [],
       phase: "setup"
+    }
+
+    game = add_player(new(), "marie")
+    {:ok, game} = place_caterpillar(game, "marie", :cruiser, 0, 0, true)
+    assert client_view(game, "marie") == %{
+      my_board: %{
+        caterpillars: %{
+          carrier:    [nil, nil, nil, nil, nil],
+          battleship: [nil, nil, nil, nil],
+          cruiser:    ["0,0", "1,0", "2,0"],
+          submarine:  [nil, nil, nil],
+          destroyer:  [nil, nil]
+          },
+        status: %{}
+      },
+      opponents: %{},
+      my_turn: true,
+      lost: false,
+      board_size: %{ height: 10, width: 10 },
+      rankings: [],
+      phase: "joining"
     }
   end
 

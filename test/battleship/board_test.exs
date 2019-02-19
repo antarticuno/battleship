@@ -4,12 +4,17 @@ defmodule Battleship.BoardTest do
 
   defp test_caterpillars do
     %{
-      carrier:    ["", "", "", "", ""],
-      battleship: ["","","",""],
-      cruiser:    ["", "", ""],
-      submarine:  ["", "", ""],
-      destroyer:  ["", ""]
+      carrier:    [nil, nil, nil, nil, nil],
+      battleship: [nil, nil, nil, nil],
+      cruiser:    [nil, nil, nil],
+      submarine:  [nil, nil, nil],
+      destroyer:  [nil, nil]
     }
+  end
+
+  test "client opponent board" do
+    assert client_opponent_board(place_caterpillar(new(), :carrier, 3, 3, false)) == %{}
+    assert client_opponent_board(update_status(new(), {3,4})) == %{"3,4" => "miss"}
   end
 
   # Stinging ---------------------------------------------------------------------------------------
