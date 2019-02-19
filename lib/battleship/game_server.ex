@@ -92,6 +92,6 @@ defmodule Battleship.GameServer do
   # end
 
   defp broadcast(state, game_name) do
-    Battleship.Endpoint.broadcast("games:" <> game_name, "update_view", state)
+    BattleshipWeb.Endpoint.broadcast("games:" <> game_name, "update_view", state)
   end
 end

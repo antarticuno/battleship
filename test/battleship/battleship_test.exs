@@ -3,6 +3,28 @@ defmodule Battleship.BattleshipTest do
   import Battleship.Game
   alias Battleship.Board
 
+  test "client view" do
+    assert client_view(add_player(new(), "nat tuck"), "nat tuck") == %{
+      my_board: Board.new(),
+      opponents: %{},
+      my_turn: true,
+      lost: false,
+      board_size: %{ height: 10, width: 10 },
+      rankings: [],
+      phase: "joining"
+    }
+
+    assert client_view(add_player(add_player(new(), "nat tuck"), "brendan"), "nat tuck") == %{
+      my_board: Board.new(),
+      opponents: %{"brendan" => %{}},
+      my_turn: false,
+      lost: false,
+      board_size: %{ height: 10, width: 10 },
+      rankings: [],
+      phase: "setup"
+    }
+  end
+
   # Joining Game  ---------------------------------------------------------------------------------
 
   test "add player" do
@@ -10,7 +32,6 @@ defmodule Battleship.BattleshipTest do
       players: ["nat tuck"], 
       rankings: [],
       turn: "nat tuck", 
-      # score: %{ "nat tuck" => 0 },
       boards: %{ "nat tuck" => Board.new() },
       board_size: %{ width: 10, height: 10 }
     }

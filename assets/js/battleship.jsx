@@ -1,7 +1,9 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
+import PropTypes from 'prop-types';
 import _ from 'lodash';
 import $ from 'jquery';
+import SetupForm from './setup.js';
 
 export default function game_init(root, channel) {
   ReactDOM.render(<Battleship channel={channel} />, root);
@@ -31,8 +33,14 @@ class Battleship extends React.Component {
       .on("update_view", this.gotView.bind(this));
   }
 
-  on_place(ev) {
-    this.channel.push("place", {type: "TODO"})
+  on_place(type, startX, startY, isHorizontal) {
+    this.channel.push("place", {
+      "player_name": window.playerName, 
+      "type": type, 
+      "start_x": startX,
+      "start_y": startY,
+      "horizontal?": isHorizontal 
+    });
   }
 
   render() {
@@ -89,26 +97,20 @@ class Battleship extends React.Component {
     return (
       <div className="container">
         <div className="row">
-          <div className="col">
-            <form>
-              Caterpillar: <select name="caterpillar">
-                <option value="carrier">Carrier</option>
-                <option value="battleship">Battleship</option>
-                <option value="cruiser">Cruiser</option>
-                <option value="submarine">Submarine</option>
-                <option value="destroyer">Destroyer</option>
-              </select>
-              Start X: <input type="text" maxLength={this.state.board_size.width} />
-              Start Y: <input type="text" maxLength={this.state.board_size.height} />
-              Direction: <select>
-              <option value="true">Horizontal</option>
-              <option value="false">Vertical</option>
-            </select>
-            <button onClick={this.on_place.bind(this)}>Place!</button>
-          </form>
+        <div className="column">
+          <PlayerBoard 
+            myBoard={this.state.my_board} 
+            width={this.state.board_size.width}
+            height={this.state.board_size.height}
+            status={this.state.status}
+          />
         </div>
-        <div className="col">
-          <PlayerBoard myBoard={this.state.my_board}/>
+          <div className="column">
+            <SetupForm 
+              maxLengthX={this.state.board_size.width}
+              maxLengthY={this.state.board_size.height}
+              onSubmit={this.on_place.bind(this)}
+            />
         </div>
       </div>
     </div>
@@ -120,10 +122,6 @@ class Battleship extends React.Component {
   }
 }
 
-function EnemyBoards(props) {
-  return (<div></div>);
-}
-
 function PlayerInput(props) {
   return (<div>
 	    Target X: <input id="target_x" type="text" />
@@ -132,8 +130,37 @@ function PlayerInput(props) {
 	  </div>);
 }
 
+function Board(props) {
+  let status = props.status;
+  let caterpillars = [];
+  if (props.caterpillars) {
+    caterpillars = _.filter(_.flatten(props.caterpillars.values), null);
+  }
+
+  let rows = [];
+  for (let r = 0; r < props.width; r++) {
+    let row = [];
+    for (let c = 0; c < props.height; c++) {
+      // TODO rendering caterpillars and hit/miss
+
+      row.push(<div key={c} className="column">X</div>);
+    }
+    rows.push(<div key={r} className="row">{row}</div>);
+  }
+
+  return (
+    <div className="board container">
+      {rows}
+    </div>
+  );
+}
+
 function PlayerBoard(props) {
   let {myBoard} = props;
+  return (<Board width={props.width} height={props.height} status={myBoard.status} caterpillars={myBoard.caterpillars} />);
+}
+
+function EnemyBoards(props) {
   return (<div></div>);
 }
 
