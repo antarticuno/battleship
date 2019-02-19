@@ -7,20 +7,23 @@ defmodule BattleshipWeb.GamesChannel do
 
   def join("games:" <> game_name, payload, socket) do
     player_name = Map.get(payload, "player_name")
-    game = BackupAgent.get(game_name) || Game.new()
+    # game = BackupAgent.get(game_name) || Game.new()
   
     if authorized?(game_name, player_name) do
+      socket = assign(socket, :game, game_name)
+      # game = GameServer.join(game_name, player_name)
       GameServer.join(game_name, player_name)
+      # IO.puts("GAME STATE" <> inspect game)
+      # socket = socket
+      # |> assign(:game_name, game_name)
+      # |> assign(:game, game)
+      # |> assign(:user, player_name) # TODO risky??
 
-      socket = socket
-      |> assign(:game_name, game_name)
-      |> assign(:game, game)
-      |> assign(:user, player_name) # TODO risky??
-
-      view = Game.client_view(game, player_name)
+      # view = Game.client_view(game, player_name)
 
       # {:ok, view, socket}
-      {:ok, view, socket}
+      # {:ok, game, socket}
+      {:ok, socket}
     else
       {:error, %{reason: "unauthorized"}}
     end
