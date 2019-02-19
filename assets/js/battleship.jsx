@@ -63,8 +63,7 @@ class Battleship extends React.Component {
 	      return this.renderJoining();
         break;
       case "setup":
-        return this.renderPlaying();
-        // return this.renderSetup();
+        return this.renderSetup();
         break;
       case "playing":
         return this.renderPlaying();
@@ -75,6 +74,11 @@ class Battleship extends React.Component {
       default:
 	      return (<div className="container">Waiting for next phase...</div>);
     }
+  }
+
+  updateView(view) {
+    console.log("update_view", view);
+    this.setState(view);
   }
 
   gotView(view) {
