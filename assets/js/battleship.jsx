@@ -1,7 +1,10 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import _ from 'lodash';
-import $ from 'jquery';
+// import $ from 'jquery';
+import SetupForm from './setup';
+import PlayerInput from './player-input';
+import {PlayerBoard, EnemyBoards} from './boards';
 
 export default function game_init(root, channel) {
   ReactDOM.render(<Battleship channel={channel} />, root);
@@ -15,24 +18,43 @@ class Battleship extends React.Component {
     this.state = {
 	    my_board: {},
 	    opponents: {},
-	    my_turn: "",
+	    my_turn: false,
 	    lost: false,
 	    board_size: {},
 	    rankings: [],         // array of names of players who have lost
 	    phase: "joining",     // joining, setup, playing, gameover phases
-    }
+    };
 
     this.channel
       .join()
       .receive("ok", this.gotView.bind(this))
       .receive("error", resp => { console.error("Unable to join", resp); });
 
-    this.channel
-      .on("update_view", this.gotView.bind(this));
+    this.channel.on("update_view", this.gotView.bind(this));
+    this.channel.on("error", err => { console.error(err); });
   }
 
-  on_place(ev) {
-    this.channel.push("place", {type: "TODO"})
+  onPlace(type, startX, startY, isHorizontal) {
+    let place = {
+      "type": type, 
+      "start_x": _.parseInt(startX),
+      "start_y": _.parseInt(startY),
+      "horizontal?": (isHorizontal == "true")
+    };
+    console.log("place", place);
+    this.channel.push("place", place);
+  }
+
+  onSting(x, y, opponent) {
+    if (this.state.my_turn) {
+      let sting = {
+        x: _.parseInt(x),
+        y: _.parseInt(y),
+        opponent: opponent
+      };
+      console.log("sting", sting);
+      this.channel.push("sting", sting);
+    }
   }
 
   render() {
@@ -41,7 +63,8 @@ class Battleship extends React.Component {
 	      return this.renderJoining();
         break;
       case "setup":
-        return this.renderSetup();
+        return this.renderPlaying();
+        // return this.renderSetup();
         break;
       case "playing":
         return this.renderPlaying();
@@ -63,78 +86,70 @@ class Battleship extends React.Component {
     return (<div className="container">Waiting for other players to join...</div>);
   }
 
-  renderPlaying() {
-    return (
-      <div className="container">
-        <div className="row">
-          <div className="col">
-            <EnemyBoards />
-          </div>
-          <div className="col">
-            <div className="row">
-              <div className="col">
-                <PlayerInput />
-              </div>
-              <div className="col">
-                <PlayerBoard />
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   renderSetup() {
     return (
       <div className="container">
         <div className="row">
-          <div className="col">
-            <form>
-              Caterpillar: <select name="caterpillar">
-                <option value="carrier">Carrier</option>
-                <option value="battleship">Battleship</option>
-                <option value="cruiser">Cruiser</option>
-                <option value="submarine">Submarine</option>
-                <option value="destroyer">Destroyer</option>
-              </select>
-              Start X: <input type="text" maxLength={this.state.board_size.width} />
-              Start Y: <input type="text" maxLength={this.state.board_size.height} />
-              Direction: <select>
-              <option value="true">Horizontal</option>
-              <option value="false">Vertical</option>
-            </select>
-            <button onClick={this.on_place.bind(this)}>Place!</button>
-          </form>
+        <div className="column">
+          <PlayerBoard 
+            myBoard={this.state.my_board} 
+            width={this.state.board_size.width}
+            height={this.state.board_size.height}
+            status={this.state.status}
+          />
         </div>
-        <div className="col">
-          <PlayerBoard myBoard={this.state.my_board}/>
+          <div className="column">
+            <SetupForm 
+              maxX={this.state.board_size.width}
+              maxY={this.state.board_size.height}
+              onSubmit={this.onPlace.bind(this)}
+            />
         </div>
       </div>
     </div>
     );
   }
 
+  renderPlaying() {
+    let opponentNames = [];
+    _.forIn(this.state.opponents, function(value, key) {
+      opponentNames.push(key);
+    });
+
+    return (
+      <div className="container">
+        <div className="row">
+          <div className="column">
+            <PlayerBoard 
+              myBoard={this.state.my_board} 
+              width={this.state.board_size.width}
+              height={this.state.board_size.height}
+              status={this.state.status}
+              name={window.playerName}
+            />  
+            <PlayerInput 
+              maxX={this.state.board_size.width} 
+              maxY={this.state.board_size.height} 
+              opponents={opponentNames}
+              onSubmit={this.onSting.bind(this)}
+              myTurn={this.state.my_turn}
+            />
+          </div>
+          <div className="column">
+            <EnemyBoards 
+              opponents={this.state.opponents} 
+              width={this.state.board_size.width} 
+              height={this.state.board_size.height}
+            />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   renderGameOver() {
     return (<ScoreBoard rankings={this.state.rankings} />);
   }
-}
-
-function EnemyBoards(props) {
-  return (<div></div>);
-}
-
-function PlayerInput(props) {
-  return (<div>
-	    Target X: <input id="target_x" type="text" />
-	    Target Y: <input id="target_y" type="text" />
-	    <button>Sting!</button>
-	  </div>);
-}
-
-function PlayerBoard(props) {
-  let {myBoard} = props;
-  return (<div></div>);
 }
 
 function ScoreBoard(props) {
