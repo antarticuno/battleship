@@ -12,8 +12,9 @@ defmodule Battleship.Application do
       BattleshipWeb.Endpoint,
       # Starts a worker by calling: Battleship.Worker.start_link(arg)
       # {Battleship.Worker, arg},
+      Battleship.BackupAgent,
       Battleship.GameSup,
-      Battleship.BackupAgent
+      # Battleship.GameServer,
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html

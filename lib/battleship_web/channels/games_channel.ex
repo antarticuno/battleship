@@ -10,7 +10,7 @@ defmodule BattleshipWeb.GamesChannel do
     game = BackupAgent.get(game_name) || Game.new()
   
     if authorized?(game_name, player_name) do
-      game = Game.add_player(game, player_name)
+      GameServer.join(game_name, player_name)
 
       socket = socket
       |> assign(:game, game)
@@ -18,11 +18,12 @@ defmodule BattleshipWeb.GamesChannel do
 
       BackupAgent.put(game_name, game)
 
-      view = Game.client_view(game, player_name)
-      send(self, :after_join)
 
-      {:ok, %{"join" => game_name, "game" => view}, socket}
-      # {:ok, socket}
+      view = Game.client_view(game, player_name)
+      # send(self, :after_join)
+
+      # {:ok, %{"join" => game_name, "game" => view}, socket}
+      {:ok, socket}
     else
       {:error, %{reason: "unauthorized"}}
     end
@@ -35,9 +36,13 @@ defmodule BattleshipWeb.GamesChannel do
     {:noreply, socket}
   end
 
-  def handle_out("update_view", payload, socket) do
-    IO.puts "HELPHELPHELP"
-    {:ok, %{"game" => payload}, socket}
+  def handle_in("update_view", payload, socket) do
+    IO.puts "update"
+    IO.inspect payload
+    # push socket, "update_view", payload
+
+    broadcast socket, "update_view", payload
+    {:noreply, socket}
   end
 
   # def handle_in("sting", payload, socket) do
