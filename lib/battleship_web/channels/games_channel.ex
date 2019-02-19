@@ -10,28 +10,35 @@ defmodule BattleshipWeb.GamesChannel do
     game = BackupAgent.get(game_name) || Game.new()
   
     if authorized?(game_name, player_name) do
-      game = Game.add_player(game, player_name)
+      GameServer.join(game_name, player_name)
 
       socket = socket
       |> assign(:game_name, game_name)
       |> assign(:game, game)
       |> assign(:user, player_name) # TODO risky??
 
-      BackupAgent.put(game_name, game)
-
       view = Game.client_view(game, player_name)
 
-      send(self, :after_join) # self is a pid = socket.channel_pid
-
+      # {:ok, view, socket}
       {:ok, view, socket}
     else
       {:error, %{reason: "unauthorized"}}
     end
   end
 
-  def handle_info(:after_join, socket) do
-    view = Game.client_view(socket.assigns[:game], socket.assigns[:user])
-    broadcast socket, "update_view", view
+  # def handle_info(:after_join, socket) do
+  #   view = Game.client_view(socket.assigns[:game], socket.assigns[:user])
+  #   broadcast socket, "update_view", view
+  #   {:noreply, socket}
+  # end
+
+  # this isn't getting called for some reason?
+  def handle_in("update_view", payload, socket) do
+    IO.puts "update"
+    IO.inspect payload
+    # push socket, "update_view", payload
+
+    broadcast socket, "update_view", payload
     {:noreply, socket}
   end
 

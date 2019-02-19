@@ -1,6 +1,7 @@
 defmodule Battleship.GameServer do
   use GenServer
 
+  alias Battleship.BackupAgent
   alias Battleship.Game
   alias Battleship.GameSup
 
@@ -20,23 +21,30 @@ defmodule Battleship.GameServer do
     GameSup.start_child(spec)
   end
 
-  def start_link(name) do
-    game = Battleship.BackupAgent.get(name) || Game.new()
-    GenServer.start_link(__MODULE__, game, name: reg(name))
+  def start_link(game_name) do
+    game = Battleship.BackupAgent.get(game_name) || Game.new()
+    GenServer.start_link(__MODULE__, game, name: reg(game_name))
   end
 
+  # runs after server is started with start_link
   def init(state) do
     {:ok, state}
+  end
+
+  def join(game_name, player_name) do
+    IO.puts("JOINING " <> game_name <> " as " <> player_name)
+    broadcast(%{hey: "test"}, game_name)
+    GenServer.cast(reg(game_name), {:join, game_name, player_name})
   end
 
   # def view(game_name, player_name) do
   #   GenServer.call(__MODULE__, {:view, game_name, player_name})
   # end
 
-  # def get_game(name, state) do
-  #   backup = BackupAgent.get(name) || Game.new()
-  #   Map.get(state, name, backup)
-  # end
+  def get_game(game_name, state) do
+    backup = BackupAgent.get(game_name) || Game.new()
+    Map.get(state, game_name, backup)
+  end
 
 
 
@@ -56,6 +64,16 @@ defmodule Battleship.GameServer do
 
 
   # Server Logic
+
+  def handle_cast({:join, game_name, player_name}, state) do
+    game = Game.add_player(get_game(game_name, state), player_name)
+    IO.inspect(game)
+    BackupAgent.put(game_name, game)
+
+    broadcast(game, game_name)
+
+    {:noreply, Map.put(state, game_name, game)}
+  end
 
   # def handle_call({:view, game_name, player_name}, _from, state) do
   #   game = Map.get(state, game_name, Game.new)
@@ -92,6 +110,7 @@ defmodule Battleship.GameServer do
   # end
 
   defp broadcast(state, game_name) do
-    Battleship.Endpoint.broadcast("games:" <> game_name, "update_view", state)
+    IO.puts("broadcasting to games:" <> game_name)
+    BattleshipWeb.Endpoint.broadcast!("games:" <> game_name, "update_view", state)
   end
 end

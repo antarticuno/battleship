@@ -28,7 +28,7 @@ class Battleship extends React.Component {
       .receive("error", resp => { console.error("Unable to join", resp); });
 
     this.channel
-      .on("update_view", this.gotView.bind(this));
+      .on("update_view", this.updateView.bind(this));
   }
 
   on_place(ev) {
@@ -52,6 +52,11 @@ class Battleship extends React.Component {
       default:
 	      return (<div className="container">Waiting for next phase...</div>);
     }
+  }
+
+  updateView(view) {
+    console.log("update_view", view);
+    this.setState(view);
   }
 
   gotView(view) {
