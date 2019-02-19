@@ -2,12 +2,22 @@
 
 @import "~milligram/dist/milligram";
 
+button.disabled {
+  pointer-events: none;
+  background-color: #606c76;
+  border-color: #606c76;
+}
+
 .inline {
   display: inline-block;
   margin-right: 20px;
 }
 
-.caterpillar {
+.board-cell {
+  text-align: center;
+}
+
+.board-cell.caterpillar {
   background-color: #ddd;
 }
 

@@ -18,7 +18,7 @@ class Battleship extends React.Component {
     this.state = {
 	    my_board: {},
 	    opponents: {},
-	    my_turn: "",
+	    my_turn: false,
 	    lost: false,
 	    board_size: {},
 	    rankings: [],         // array of names of players who have lost
@@ -36,22 +36,25 @@ class Battleship extends React.Component {
 
   onPlace(type, startX, startY, isHorizontal) {
     let place = {
-      "player_name": window.playerName, 
       "type": type, 
       "start_x": _.parseInt(startX),
       "start_y": _.parseInt(startY),
       "horizontal?": (isHorizontal == "true")
     };
-    console.log(place);
+    console.log("place", place);
     this.channel.push("place", place);
   }
 
-  onSting(startX, startY) {
-    let sting = {
-      // TODO
-    };
-    console.log(sting);
-    this.channel.push("sting", sting);
+  onSting(x, y, opponent) {
+    if (this.state.my_turn) {
+      let sting = {
+        x: _.parseInt(x),
+        y: _.parseInt(y),
+        opponent: opponent
+      };
+      console.log("sting", sting);
+      this.channel.push("sting", sting);
+    }
   }
 
   render() {
@@ -60,7 +63,8 @@ class Battleship extends React.Component {
 	      return this.renderJoining();
         break;
       case "setup":
-        return this.renderSetup();
+        return this.renderPlaying();
+        // return this.renderSetup();
         break;
       case "playing":
         return this.renderPlaying();
@@ -107,6 +111,11 @@ class Battleship extends React.Component {
   }
 
   renderPlaying() {
+    let opponentNames = [];
+    _.forIn(this.state.opponents, function(value, key) {
+      opponentNames.push(key);
+    });
+
     return (
       <div className="container">
         <div className="row">
@@ -121,7 +130,9 @@ class Battleship extends React.Component {
             <PlayerInput 
               maxX={this.state.board_size.width} 
               maxY={this.state.board_size.height} 
+              opponents={opponentNames}
               onSubmit={this.onSting.bind(this)}
+              myTurn={this.state.my_turn}
             />
           </div>
           <div className="column">

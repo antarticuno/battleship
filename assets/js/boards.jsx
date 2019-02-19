@@ -39,23 +39,29 @@ export function EnemyBoards(props) {
 function Board(props) {
   let status = props.status;
   let caterpillars = _.filter(props.caterpillarCoords, null);
+  let cols = [];
+  for (let c = 0; c < props.width; c++) {
+    let col = [];
+    for (let r = 0; r < props.height; r++) {
+      let coord = r + "," + c;
+      let s = props.status[coord];
+      
+      let isHit = s == "hit";
+      let isMiss = s == "miss";
+      let hit = isHit ? " hit" : isMiss ? " miss" : "";
 
-  let rows = [];
-  for (let r = 0; r < props.width; r++) {
-    let row = [];
-    for (let c = 0; c < props.height; c++) {
-      // TODO render hit/miss
-      let inCaterpillar = caterpillars.includes(r + "," + c);
-      row.push(<div key={c} className={"column" + (inCaterpillar ? " caterpillar" : "")}>X</div>);
+      col.push(<div key={r} className={coord + " column board-cell" + (caterpillars.includes(coord) ? " caterpillar" : "") + hit}>
+          {isHit ? "X" : isMiss ? "O" : "_"}
+        </div>);
     }
-    rows.push(<div key={r} className="row">{row}</div>);
+    cols.push(<div key={c} className="row">{col}</div>);
   }
 
   return (
     <div className="board">
       {props.name ? <h4>Board for: {props.name}</h4> : false}
       <div className="container">
-        {rows}
+        {cols}
       </div>
     </div>
   );

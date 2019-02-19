@@ -94,6 +94,10 @@ defmodule Battleship.Game do
 
   # Playing Phase ---------------------------------------------------------------------------------
 
+  def can_sting?(game, player_name) do
+    has_player?(game, player_name) && game.turn == player_name
+  end
+
   # ASSUMES: player whose turn it is is doing the stinging
   def sting(game, opponent, target) do
     board = Map.get(game.boards, opponent)

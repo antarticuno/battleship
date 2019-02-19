@@ -15,7 +15,7 @@ defmodule BattleshipWeb.GamesChannel do
       socket = socket
       |> assign(:game_name, game_name)
       |> assign(:game, game)
-      |> assign(:user, player_name) # TODO risky??
+      |> assign(:user, player_name)
 
       BackupAgent.put(game_name, game)
 
@@ -35,21 +35,43 @@ defmodule BattleshipWeb.GamesChannel do
     {:noreply, socket}
   end
 
-  # def handle_in("sting", payload, socket) do
-  #   name = socket.assigns[:name]
-  #   game = GameServer.guess()
-  #   player_name = "TODO"
-  #   {:reply, {:waiting, %{"game" => Game.client_view(game, player_name)}}, socket}
-  # end
-
-  def handle_in("place", %{ "player_name" => player_name, "type" => type,
-    "start_x" => start_x, "start_y" => start_y, "horizontal?" => horizontal}, socket) do
-
+  # TODO implement this in Server and have server change whose turn it is after stinging
+  def handle_in("sting", %{"opponent" => opponent, "x" => x, "y" => y}, socket) do
     game = socket.assigns[:game]
+    player_name = socket.assigns[:user]
+    target = {x, y}
+
+    # check if player exists in game & that it is player_name's turn
+    if (Game.can_sting?(game, player_name)) do
+      {result, g} = Game.sting(game, opponent, target)
+      if (result == :ok) do
+        BackupAgent.put(socket.assigns[:name], g)     
+        #TODO for some reason broadcasting same client view to all players...
+        broadcast socket, "update_view", Game.client_view(g, player_name)
+
+        {:noreply, socket}
+        # {:reply, {:ok, %{"game" => Game.client_view(g, player_name)}}, socket}
+      else
+        broadcast socket, "error", Game.client_view(game, socket.assigns[:user])
+        {:error, %{reason: g}}
+      end
+
+
+      {:reply, {:waiting, %{"game" => Game.client_view(game, player_name)}}, socket}
+    else
+      broadcast socket, "error", Game.client_view(game, socket.assigns[:user])
+      {:reply, :error, %{reason: "invalid sting"}} # TODO
+    end
+  end
+
+  def handle_in("place", %{ "type" => type, "start_x" => start_x, "start_y" => start_y, "horizontal?" => horizontal}, socket) do
+    game = socket.assigns[:game]
+    player_name = socket.assigns[:user]
+
+    # TODO don't need to check if game has player I think
     if (Game.has_player?(game, player_name)) do
        # TODO make sure the types match place_caterpillar
       {result, g} = Game.place_caterpillar(game, player_name, String.to_atom(type), start_x, start_y, horizontal)
-      IO.inspect(g)
       if (result == :ok) do
         BackupAgent.put(socket.assigns[:name], g)     
         broadcast socket, "update_view", Game.client_view(g, player_name)
@@ -57,11 +79,11 @@ defmodule BattleshipWeb.GamesChannel do
         {:reply, {:ok, %{"game" => Game.client_view(g, player_name)}}, socket}
       else
         broadcast socket, "error", Game.client_view(game, socket.assigns[:user])
-        {:error, %{reason: g}}
+        {:reply, {:error, %{reason: g}}}
       end
        
      else
-       {:error, %{reason: "No player for place"}}
+       {:reply, {:error, %{reason: "No player for place"}}}
      end
   end
 
