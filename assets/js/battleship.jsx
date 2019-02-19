@@ -31,8 +31,24 @@ class Battleship extends React.Component {
       .on("update_view", this.gotView.bind(this));
   }
 
+  // TODO maybe use jquery UI to let a grid be selectable?
   on_place(ev) {
-    this.channel.push("place", {type: "TODO"})
+    this.channel.push("place", {
+      player_name: "TODO PLACEHOLDER", // maybe get the player_name from the cookie?
+      type: document.getElementById("caterpillar").value,
+      start_x: document.getElementById("x").value,
+      start_y: document.getElementById("y").value,
+      horizontal?: document.getElementById("direction").value,
+    });
+  }
+
+  // TODO click on the cell to fire at
+  on_sting(ev) {
+    let table = $(ev.target).parent().parent().parent();
+    this.channel.push("sting", {
+      opponent: table.id,
+      target: ev.target.id,
+    });
   }
 
   render() {
@@ -91,16 +107,16 @@ class Battleship extends React.Component {
         <div className="row">
           <div className="col">
             <form>
-              Caterpillar: <select name="caterpillar">
+              Caterpillar: <select id="caterpillar">
                 <option value="carrier">Carrier</option>
                 <option value="battleship">Battleship</option>
                 <option value="cruiser">Cruiser</option>
                 <option value="submarine">Submarine</option>
                 <option value="destroyer">Destroyer</option>
               </select>
-              Start X: <input type="text" maxLength={this.state.board_size.width} />
-              Start Y: <input type="text" maxLength={this.state.board_size.height} />
-              Direction: <select>
+              Start X: <input id="x" type="text" />
+              Start Y: <input id="y" type="text" />
+              Direction: <select id="direction">
               <option value="true">Horizontal</option>
               <option value="false">Vertical</option>
             </select>
