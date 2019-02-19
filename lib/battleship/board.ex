@@ -34,7 +34,6 @@ defmodule Battleship.Board do
   end
 
   defp convert_caterpillar(coords) do
-    IO.inspect(coords)
     coords
     |> Enum.map(fn c -> (if c == nil, do: nil, else: convert_coordinate(c)) end)
     |> Enum.to_list()
