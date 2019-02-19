@@ -32,16 +32,23 @@ defmodule Battleship.GameServer do
   end
 
   def join(game_name, player_name) do
-    # broadcast(%{hey: "test"}, game_name)
     # GenServer.cast(reg(game_name), {:join, game_name, player_name})
     GenServer.cast(__MODULE__, {:join, game_name, player_name})
+  end
+
+  def get_game(game_name) do
+    GenServer.call(__MODULE__, {:get_game, game_name})
+  end
+
+  def place_caterpillar(game_name, player_name, type, start_x, start_y, horizontal) do
+    GenServer.call(__MODULE__, {:place, game_name, player_name, type, start_x, start_y, horizontal})  
   end
 
   # def view(game_name, player_name) do
   #   GenServer.call(__MODULE__, {:view, game_name, player_name})
   # end
 
-  def get_game(game_name, state) do
+  defp get_game(game_name, state) do
     backup = BackupAgent.get(game_name) || Game.new()
     Map.get(state, reg(game_name), backup)
   end
@@ -66,6 +73,23 @@ defmodule Battleship.GameServer do
 
     broadcast(Game.client_view(game, player_name), game_name)
     {:noreply, Map.put(state, reg(game_name), game)}
+  end
+
+  def handle_call({:place, game_name, player_name, type, start_x, start_y, horizontal}, _from, state) do
+    game = get_game(game_name, state)
+    {result, g} = Game.place_caterpillar(game, player_name, type, start_x, start_y, horizontal)
+    BackupAgent.put(game_name, g)     
+
+    case result do
+      :ok -> broadcast(Game.client_view(g, player_name), game_name)
+      :error -> broadcast(Game.client_view(g, player_name), game_name) # TODO add helpful error msg
+    end
+      {:reply, game, game} # TODO idk if this is right
+  end
+
+  def handle_call({:get_game, game_name}, _from, state) do
+    game = get_game(game_name, state)
+    {:reply, game, game}
   end
 
   # def handle_call({:view, game_name, player_name}, _from, state) do
