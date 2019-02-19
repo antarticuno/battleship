@@ -45,11 +45,11 @@ function Board(props) {
     for (let r = -1; r < props.height; r++) {
 
       if (c == -1 && r == -1) {
-        col.push(<div className="column board-cell label"></div>);
+        col.push(<div key={r} className="column board-cell label"></div>);
       } else if (c == -1) {
-        col.push(<div className="column board-cell label">{r}</div>);
+        col.push(<div key={r} className="column board-cell label">{r}</div>);
       } else if (r == -1) {
-        col.push(<div className="column board-cell label">{c}</div>);
+        col.push(<div key={r} className="column board-cell label">{c}</div>);
       } else {
         let coord = r + "," + c;
         let s = props.status[coord];

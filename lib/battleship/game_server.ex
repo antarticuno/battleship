@@ -1,6 +1,7 @@
 defmodule Battleship.GameServer do
   use GenServer
 
+  alias Battleship.BackupAgent
   alias Battleship.Game
   alias Battleship.GameSup
 
@@ -20,25 +21,30 @@ defmodule Battleship.GameServer do
     GameSup.start_child(spec)
   end
 
-  def start_link(name) do
-    game = Battleship.BackupAgent.get(name) || Game.new()
-    GenServer.start_link(__MODULE__, game, name: reg(name))
+  def start_link(game_name) do
+    # game = Battleship.BackupAgent.get(game_name) || Game.new()
+    GenServer.start_link(__MODULE__, %{}, name: __MODULE__)
   end
 
+  # runs after server is started with start_link
   def init(state) do
     {:ok, state}
+  end
+
+  def join(game_name, player_name) do
+    # broadcast(%{hey: "test"}, game_name)
+    # GenServer.cast(reg(game_name), {:join, game_name, player_name})
+    GenServer.cast(__MODULE__, {:join, game_name, player_name})
   end
 
   # def view(game_name, player_name) do
   #   GenServer.call(__MODULE__, {:view, game_name, player_name})
   # end
 
-  # def get_game(name, state) do
-  #   backup = BackupAgent.get(name) || Game.new()
-  #   Map.get(state, name, backup)
-  # end
-
-
+  def get_game(game_name, state) do
+    backup = BackupAgent.get(game_name) || Game.new()
+    Map.get(state, reg(game_name), backup)
+  end
 
   # # TODO make sure to have a handle_call sting
   # def sting(game_name, coordinate, user_name, coordinate) do
@@ -50,12 +56,17 @@ defmodule Battleship.GameServer do
   #   GenServer.call(__MODULE__, {:place, game_name})
   # end
 
-  # def join(game_name, user_name) do
-  #   GenServer.cast(__MODULE__, {:join, game_name, user_name})
-  # end
-
 
   # Server Logic
+
+  def handle_cast({:join, game_name, player_name}, state) do
+    game = Game.add_player(get_game(game_name, state), player_name)
+    BackupAgent.put(game_name, game)
+    # IO.puts("CAST CALLED" <> inspect game)
+
+    broadcast(Game.client_view(game, player_name), game_name)
+    {:noreply, Map.put(state, reg(game_name), game)}
+  end
 
   # def handle_call({:view, game_name, player_name}, _from, state) do
   #   game = Map.get(state, game_name, Game.new)
@@ -92,6 +103,8 @@ defmodule Battleship.GameServer do
   # end
 
   defp broadcast(state, game_name) do
+    IO.puts("broadcasting to games:" <> game_name)
+    IO.puts(inspect state)
     BattleshipWeb.Endpoint.broadcast("games:" <> game_name, "update_view", state)
   end
 end
