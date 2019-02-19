@@ -23,15 +23,12 @@ class Battleship extends React.Component {
     }
 
     this.channel
-      //.on("update_view", payload => {this.setState(payload.game)})
-      //.on("update_view", payload => {this.gotView(payload)})
-      //.on("update_view", payload => {this.forceUpdate.bind(this)})
-      .on("update_view", payload => {console.log(payload)})
-
-    this.channel
       .join()
       .receive("ok", this.gotView.bind(this))
       .receive("error", resp => { console.error("Unable to join", resp); });
+
+    this.channel
+      .on("update_view", this.gotView.bind(this));
   }
 
   on_place(ev) {
@@ -39,7 +36,6 @@ class Battleship extends React.Component {
   }
 
   render() {
-    console.log("state", this.state);
     switch (this.state.phase) {
       case "joining":
 	      return this.renderJoining();
@@ -59,7 +55,8 @@ class Battleship extends React.Component {
   }
 
   gotView(view) {
-    this.setState(view.game);
+    console.log("got_view", view);
+    this.setState(view);
   }
 
   renderJoining() {

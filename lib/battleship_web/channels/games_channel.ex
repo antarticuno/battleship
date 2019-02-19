@@ -23,8 +23,7 @@ defmodule BattleshipWeb.GamesChannel do
 
       send(self, :after_join) # self is a pid = socket.channel_pid
 
-      {:ok, %{"join" => game_name, "game" => view}, socket}
-      # {:ok, socket}
+      {:ok, view, socket}
     else
       {:error, %{reason: "unauthorized"}}
     end
