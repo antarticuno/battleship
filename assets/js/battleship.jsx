@@ -153,6 +153,6 @@ class Battleship extends React.Component {
 
 function ScoreBoard(props) {
   let {rankings} = props;
-  let r = _.map(rankings, (player_name, ii) => {return <p key={ii}>{ii + 1}. player_name</p>});
+  let r = _.map(rankings, (player_name, ii) => {return <p key={ii}>{ii + 1}. {player_name}</p>});
   return r;
 }
