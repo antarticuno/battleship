@@ -115,12 +115,13 @@ defmodule Battleship.BoardTest do
   test "dead?" do
     assert dead?([], %{})
     assert dead?([{0, 0}], Map.put(%{}, {0, 0}, "hit"))
+    assert dead?([{0, 0}, {0, 1}], Map.put(Map.put(%{}, {0, 0}, "hit"), {0, 1}, "hit"))
     assert !dead?([{0, 0}], %{})
   end
 
   test "lost?" do
     assert !lost?(%{caterpillars: Map.put(test_caterpillars(), :patrol, [{0, 0}, {0, 1}]), status: %{}})
-    assert lost?(%{caterpillars: Map.put(test_caterpillars(), :patrol, [{0, 0}, {0, 1}]),
+    assert lost?(%{caterpillars: Map.put(%{}, :patrol, [{0, 0}, {0, 1}]),
                     status: Map.put(Map.put(%{}, {0, 0}, "hit"), {0, 1}, "hit")})
   end
 end
