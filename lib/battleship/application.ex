@@ -14,7 +14,6 @@ defmodule Battleship.Application do
       # {Battleship.Worker, arg},
       Battleship.GameSup,
       Battleship.BackupAgent,
-      Battleship.GameServer,
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html
