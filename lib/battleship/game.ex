@@ -135,7 +135,7 @@ defmodule Battleship.Game do
 
   def remaining_players(game), do: game.players -- game.rankings
 
-  def game_over?(game), do: length(remaining_players(game)) == 0
+  def game_over?(game), do: length(remaining_players(game)) == 1
 
   def player_lost?(game, player_name), do: Board.lost?(get_player_board(game, player_name))
 end

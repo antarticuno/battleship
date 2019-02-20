@@ -133,7 +133,7 @@ defmodule Battleship.Board do
 
   # Status ----------------------------------------------------------------------------------------
 
-  defp dead?(caterpillar, status) do
+  def dead?(caterpillar, status) do
     caterpillar
     |> Enum.all?(&(Map.get(status, &1) == "hit"))
   end
