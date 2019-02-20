@@ -69,9 +69,8 @@ defmodule Battleship.GameServer do
   def handle_cast({:join, game_name, player_name}, state) do
     game = Game.add_player(get_game(game_name, state), player_name)
     BackupAgent.put(game_name, game)
-    # IO.puts("CAST CALLED" <> inspect game)
 
-    broadcast(Game.client_view(game, player_name), game_name)
+    broadcast(game, game_name)
     {:noreply, Map.put(state, reg(game_name), game)}
   end
 
@@ -81,8 +80,8 @@ defmodule Battleship.GameServer do
     BackupAgent.put(game_name, g)     
 
     case result do
-      :ok -> broadcast(Game.client_view(g, player_name), game_name)
-      :error -> broadcast(Game.client_view(g, player_name), game_name) # TODO add helpful error msg
+      :ok -> broadcast(g, game_name)
+      :error -> broadcast(g, game_name) # TODO add helpful error msg
     end
       {:reply, game, game} # TODO idk if this is right
   end
@@ -127,8 +126,6 @@ defmodule Battleship.GameServer do
   # end
 
   defp broadcast(state, game_name) do
-    IO.puts("broadcasting to games:" <> game_name)
-    IO.puts(inspect state)
-    BattleshipWeb.Endpoint.broadcast("games:" <> game_name, "update_view", state)
+    BattleshipWeb.Endpoint.broadcast("games:" <> game_name, "update", state)
   end
 end
