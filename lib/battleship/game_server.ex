@@ -72,8 +72,8 @@ defmodule Battleship.GameServer do
   end
 
   defp update_and_broadcast(game_name, {result, game}) do
-    unless result == :error do
-      game = Game.advance_phase(Game.next_player(game))
+    if result == :error do
+      # TODO have some sort of try again message
     end
 
     Battleship.BackupAgent.put(game_name, game)
