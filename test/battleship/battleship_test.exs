@@ -25,15 +25,15 @@ defmodule Battleship.BattleshipTest do
     }
 
     game = add_player(new(), "marie")
-    {:ok, game} = place_caterpillar(game, "marie", :cruiser, 0, 0, true)
+    {:ok, game} = place_caterpillar(game, "marie", :destroyer, 0, 0, true)
     assert client_view(game, "marie") == %{
       my_board: %{
         caterpillars: %{
           carrier:    [nil, nil, nil, nil, nil],
           battleship: [nil, nil, nil, nil],
-          cruiser:    ["0,0", "1,0", "2,0"],
+          destroyer:    ["0,0", "1,0", "2,0"],
           submarine:  [nil, nil, nil],
-          destroyer:  [nil, nil]
+          patrol:  [nil, nil]
           },
         status: %{}
       },
@@ -67,7 +67,7 @@ defmodule Battleship.BattleshipTest do
     game = add_player(new(), "marie")
     {:ok, game} = place_caterpillar(game, "marie", :carrier, 0, 0, false)
     {:ok, game} = place_caterpillar(game, "marie", :battleship, 1, 0, false)
-    {:ok, game} = place_caterpillar(game, "marie", :cruiser, 2, 0, false)
+    {:ok, game} = place_caterpillar(game, "marie", :patrol, 2, 0, false)
     {:ok, game} = place_caterpillar(game, "marie", :submarine, 3, 0, false)
     assert !setup_done?(game)
     {:ok, game} = place_caterpillar(game, "marie", :destroyer, 4, 0, false)
@@ -76,10 +76,41 @@ defmodule Battleship.BattleshipTest do
     # all players must be done setting up
     game = add_player(game, "brendan")
     assert !setup_done?(game)
+
+    game = %{
+      board_size: %{height: 10, width: 10},
+      boards: %{
+        "me" => %{
+          caterpillars: %{
+            battleship: [{2, 0}, {2, 1}, {2, 2}, {2, 3}],
+            carrier: [{0, 0}, {0, 1}, {0, 2}, {0, 3}, {0, 4}],
+            destroyer: [{3, 0}, {3, 1}, {3, 2}],
+            patrol: [{5, 0}, {5, 1}],
+            submarine: [{4, 0}, {4, 1}, {4, 2}]
+          },
+          status: %{}
+        },
+        "you" => %{
+          caterpillars: %{
+            battleship: [{0, 2}, {1, 2}, {2, 2}, {3, 2}],
+            carrier: [{0, 0}, {1, 0}, {2, 0}, {3, 0}, {4, 0}],
+            destroyer: [{0, 3}, {1, 3}, {2, 3}],
+            patrol: [{0, 6}, {1, 6}],
+            submarine: [{0, 5}, {1, 5}, {2, 5}]
+          },
+          status: %{}
+        }
+      },
+      players: ["you", "me"],
+      rankings: [],
+      turn: "you"
+    }
+    assert setup_done?(game)
+
   end
 
   test "place caterpillar" do
-    assert place_caterpillar(add_player(new(), "brendan"), "brendan", :cruiser, 0, 0, true) == 
+    assert place_caterpillar(add_player(new(), "brendan"), "brendan", :destroyer, 0, 0, true) == 
       {:ok, 
         %{
           players: ["brendan"], 
@@ -89,16 +120,16 @@ defmodule Battleship.BattleshipTest do
             caterpillars: %{
               carrier:    [nil, nil, nil, nil, nil],
               battleship: [nil, nil, nil, nil],
-              cruiser:    [{0,0}, {1,0}, {2,0}],
+              destroyer:    [{0,0}, {1,0}, {2,0}],
               submarine:  [nil, nil, nil],
-              destroyer:  [nil, nil]
+              patrol:  [nil, nil]
             },
             status: %{}
           }},
             board_size: %{ :width => 10, :height => 10 }
         }
       }
-    assert place_caterpillar(add_player(new(), "brendan"), "brendan", :cruiser, 8, 8, false) == 
+    assert place_caterpillar(add_player(new(), "brendan"), "brendan", :destroyer, 8, 8, false) == 
       {:error, add_player(new(), "brendan")}
   end
 
@@ -115,9 +146,9 @@ defmodule Battleship.BattleshipTest do
         caterpillars: %{
           carrier:    [nil, nil, nil, nil, nil],
           battleship: [nil, nil, nil, nil],
-          cruiser:    [nil, nil, nil],
+          destroyer:    [nil, nil, nil],
           submarine:  [nil, nil, nil],
-          destroyer:  [nil, nil]
+          patrol:  [nil, nil]
         },
         status: %{{3, 4} => "miss"}
       }},
@@ -127,7 +158,7 @@ defmodule Battleship.BattleshipTest do
     assert sting(game, "brendan", {3, 4}) == {:ok, stung_game}
     assert sting(stung_game, "brendan", {3, 4}) == {:error, stung_game}
 
-    {:ok, stung_game} = place_caterpillar(stung_game, "brendan", :cruiser, 1, 1, true)
+    {:ok, stung_game} = place_caterpillar(stung_game, "brendan", :destroyer, 1, 1, true)
     assert sting(stung_game, "brendan", {2, 1}) == {:ok, 
       %{
         players: ["brendan"], 
@@ -137,39 +168,51 @@ defmodule Battleship.BattleshipTest do
           caterpillars: %{
             carrier:    [nil, nil, nil, nil, nil],
             battleship: [nil, nil, nil, nil],
-            cruiser:    [{1,1}, {2,1}, {3,1}],
+            destroyer:    [{1,1}, {2,1}, {3,1}],
             submarine:  [nil, nil, nil],
-            destroyer:  [nil, nil]
+            patrol:  [nil, nil]
           },
           status: %{{2,1} => "hit", {3, 4} => "miss"}
         }},
         board_size: %{ :width => 10, :height => 10 }
       }
     }
-
   end
-
-  # test "update score" do
-  #   assert update_score(add_player(new(), "jj"), "jj", 3) == %{
-  #     player_names: ["jj"], 
-  #     rankings: [],
-  #     turn: 0, 
-  #     score: %{ "jj" => 3 },
-  #     boards: %{ "jj" => new_board() },
-  #     board_width: 10,
-  #     board_height: 10
-  #   }
-  # end
 
   # Game Status -----------------------------------------------------------------------------------
 
-  # test "remaining players" do
-  #   assert remaining_players(add_player(new(), "liz")) == 1
-  #   # TODO test case where some players actually lost
-  # end
+  test "get game phase" do
+    assert get_game_phase(new()) == "joining"
+    assert get_game_phase(add_player(add_player(new(), "b"), "a")) == "setup"
 
-  # test "player lost?" do
-  #   assert player_lost?(add_player(new(), "brendan"), "brendan") == false
-  #   # TODO test case where player did lose
-  # end
+    game = %{
+      board_size: %{height: 10, width: 10},
+      boards: %{
+        "me" => %{
+          caterpillars: %{
+            battleship: [{2, 0}, {2, 1}, {2, 2}, {2, 3}],
+            carrier: [{0, 0}, {0, 1}, {0, 2}, {0, 3}, {0, 4}],
+            destroyer: [{3, 0}, {3, 1}, {3, 2}],
+            patrol: [{5, 0}, {5, 1}],
+            submarine: [{4, 0}, {4, 1}, {4, 2}]
+          },
+          status: %{}
+        },
+        "you" => %{
+          caterpillars: %{
+            battleship: [{0, 2}, {1, 2}, {2, 2}, {3, 2}],
+            carrier: [{0, 0}, {1, 0}, {2, 0}, {3, 0}, {4, 0}],
+            destroyer: [{0, 3}, {1, 3}, {2, 3}],
+            patrol: [{0, 6}, {1, 6}],
+            submarine: [{0, 5}, {1, 5}, {2, 5}]
+          },
+          status: %{}
+        }
+      },
+      players: ["you", "me"],
+      rankings: [],
+      turn: "you"
+    }
+    assert get_game_phase(game) == "playing"
+  end
 end

@@ -67,10 +67,18 @@ defmodule Battleship.GameServer do
     BackupAgent.put(game_name, g)     
 
     case result do
-      :ok -> broadcast(g, game_name)
-      :error -> broadcast(g, game_name) # TODO add helpful error msg
+      :ok -> broadcast(Game.advance_phase(g), game_name)
+      :error -> broadcast(g, game_name) # TODO add helpful error msg?
     end
       {:reply, game, game}
+# <<<<<<< HEAD
+#   end
+
+#   def handle_call({:get_game, game_name}, _from, state) do
+#     game = get_game(game_name, state)
+#     {:reply, game, game}
+# =======
+# >>>>>>> master
   end
 
   # def handle_call({:sting, game_name, opponent, target}, _from, state) do
