@@ -22,7 +22,6 @@ defmodule Battleship.GameServer do
   end
 
   def start_link(game_name) do
-    # game = Battleship.BackupAgent.get(game_name) || Game.new()
     GenServer.start_link(__MODULE__, %{}, name: __MODULE__)
   end
 
@@ -32,7 +31,6 @@ defmodule Battleship.GameServer do
   end
 
   def join(game_name, player_name) do
-    # GenServer.cast(reg(game_name), {:join, game_name, player_name})
     GenServer.cast(__MODULE__, {:join, game_name, player_name})
   end
 
@@ -80,10 +78,10 @@ defmodule Battleship.GameServer do
     BackupAgent.put(game_name, g)     
 
     case result do
-      :ok -> broadcast(g, game_name)
-      :error -> broadcast(g, game_name) # TODO add helpful error msg
+      :ok -> broadcast(Game.advance_phase(g), game_name)
+      :error -> broadcast(g, game_name) # TODO add helpful error msg?
     end
-      {:reply, game, game} # TODO idk if this is right
+      {:reply, game, game}
   end
 
   def handle_call({:get_game, game_name}, _from, state) do
