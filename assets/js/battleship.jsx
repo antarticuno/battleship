@@ -131,17 +131,11 @@ class Battleship extends React.Component {
               status={this.state.status}
               name={window.playerName}
             />  
-            {this.state.my_turn ? (<PlayerInput 
-              maxX={this.state.board_size.width - 1} 
-              maxY={this.state.board_size.height - 1} 
-              opponents={opponentNames}
-              onSubmit={this.onSting.bind(this)}
-              myTurn={this.state.my_turn}
-            />) : false}
-            
+            {this.state.my_turn ? (<h4>Time to Sting!</h4>) : false}
           </div>
           <div className="column">
             <EnemyBoards 
+	      onClick={this.onSting.bind(this)}
               opponents={this.state.opponents} 
               width={this.state.board_size.width} 
               height={this.state.board_size.height}
