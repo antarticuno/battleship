@@ -2,7 +2,7 @@ defmodule Battleship.Game do
 
   alias Battleship.Board
 
-  @num_players 2
+  @num_players 2 # in the interest of scope, limit to two players
 
   def new do
     %{
@@ -37,20 +37,6 @@ defmodule Battleship.Game do
 
   defp set_player_board(game, player_name, new_board) do
     Map.put(game, :boards, Map.put(game.boards, player_name, new_board))
-  end
-
-  defp get_player_caterpillars(game, player_name) do
-    board = get_player_board(game, player_name)
-    Map.get(board, :caterpillars)
-  end
-
-  defp get_player_status(game, player_name) do
-    board = get_player_board(game, player_name)
-    Map.get(board, :status)
-  end
-
-  defp get_opponent_boards(game, player_name) do
-    Map.split(game.boards, [player_name])
   end
 
   # Joining Game  ---------------------------------------------------------------------------------
