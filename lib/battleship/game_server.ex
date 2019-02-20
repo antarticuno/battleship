@@ -68,9 +68,9 @@ defmodule Battleship.GameServer do
 
     case result do
       :ok -> broadcast(Game.client_view(g, player_name), game_name)
-      :error -> broadcast(Game.client_view(g, player_name), game_name) # TODO add helpful error msg
+      :error -> broadcast(Game.client_view(game, player_name), game_name) # TODO add helpful error msg
     end
-      {:reply, Map.put(state, reg(game_name), game), game} # TODO idk if this is right
+      {:reply, game, game}
   end
 
   # def handle_call({:sting, game_name, opponent, target}, _from, state) do
@@ -87,8 +87,6 @@ defmodule Battleship.GameServer do
   # end
 
   defp broadcast(state, game_name) do
-    IO.puts("broadcasting to games:" <> game_name)
-    IO.puts(inspect state)
     BattleshipWeb.Endpoint.broadcast("games:" <> game_name, "update_view", state)
   end
 end
