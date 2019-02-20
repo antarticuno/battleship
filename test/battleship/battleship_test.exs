@@ -179,6 +179,14 @@ defmodule Battleship.BattleshipTest do
     }
   end
 
+  test "next player" do
+    game = add_player(add_player(new(), "a"), "b")
+    assert game.turn == "b"
+    assert next_player(game).turn == "a"
+    assert next_player(next_player(game)).turn == "b"
+    assert next_player(next_player(next_player(game))).turn == "a"
+  end
+
   # Game Status -----------------------------------------------------------------------------------
 
   test "get game phase" do

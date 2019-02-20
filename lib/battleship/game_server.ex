@@ -42,18 +42,17 @@ defmodule Battleship.GameServer do
     GenServer.call(reg(game_name), {:place, game_name, player_name, type, start_x, start_y, horizontal})
   end
 
+  def sting(game_name, opponent, coordinate) do
+    GenServer.call(reg(game_name), {:sting, game_name, opponent, coordinate})
+  end
+
   def get_game(game_name) do
     BackupAgent.get(game_name) || Game.new()
   end
 
-  # # TODO make sure to have a handle_call sting
-  # def sting(game_name, coordinate, user_name, coordinate) do
-  #   GenServer.call(__MODULE__, {:sting, game_name, user_name, coordinate})
-  # end
-
-
   # Server Logic
 
+  # TODO handle adding observers to the game?
   def handle_cast({:join, game_name, player_name}, _state) do
     game = Game.add_player(get_game(game_name), player_name)
     BackupAgent.put(game_name, game)
@@ -61,38 +60,26 @@ defmodule Battleship.GameServer do
     {:noreply, game}
   end
 
-  def handle_call({:place, game_name, player_name, type, start_x, start_y, horizontal}, _from, state) do
+  def handle_call({:place, game_name, player_name, type, start_x, start_y, horizontal}, _from, _state) do
     game = get_game(game_name)
     {result, g} = Game.place_caterpillar(game, player_name, type, start_x, start_y, horizontal)
-    BackupAgent.put(game_name, g)     
-
-    case result do
-      :ok -> broadcast(Game.advance_phase(g), game_name)
-      :error -> broadcast(g, game_name) # TODO add helpful error msg?
-    end
-      {:reply, game, game}
-# <<<<<<< HEAD
-#   end
-
-#   def handle_call({:get_game, game_name}, _from, state) do
-#     game = get_game(game_name, state)
-#     {:reply, game, game}
-# =======
-# >>>>>>> master
+    update_and_broadcast(game_name, {result, g})
   end
 
-  # def handle_call({:sting, game_name, opponent, target}, _from, state) do
-  #   game = get_game(game_name, state)
-  #   game = Game.sting(game, target, target)
-  #   broadcast(Game.client_view(game), game_name)
-  #   Battleship.BackupAgent.put(game_name, game)
-  #   {:reply, game, game}
-  # end
+  def handle_call({:sting, game_name, opponent, target}, _from, _state) do
+    game = get_game(game_name)
+    update_and_broadcast(game_name, Game.sting(game, opponent, target))
+  end
 
-  # # TODO
-  # def handle_call({:new, _name}, _from, game) do
-  #   {:reply, game, game}
-  # end
+  defp update_and_broadcast(game_name, {result, game}) do
+    unless result == :error do
+      game = Game.advance_phase(Game.next_player(game))
+    end
+
+    Battleship.BackupAgent.put(game_name, game)
+    broadcast(game, game_name)
+    {:reply, game, game}
+  end
 
   defp broadcast(state, game_name) do
     BattleshipWeb.Endpoint.broadcast("games:" <> game_name, "update", state)

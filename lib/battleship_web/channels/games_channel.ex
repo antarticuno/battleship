@@ -2,7 +2,6 @@ defmodule BattleshipWeb.GamesChannel do
   use BattleshipWeb, :channel
 
   alias Battleship.Game
-  alias Battleship.BackupAgent
   alias Battleship.GameServer
 
   intercept ["update"]
@@ -40,41 +39,13 @@ defmodule BattleshipWeb.GamesChannel do
     {:noreply, socket}
   end
 
-  # TODO implement this in Server and have server change whose turn it is after stinging
   def handle_in("sting", %{"opponent" => opponent, "x" => x, "y" => y}, socket) do
-    game = socket.assigns[:game]
-    player_name = socket.assigns[:user]
+    game_name = socket.assigns[:game]
     target = {x, y}
 
-    # check if player exists in game & that it is player_name's turn
-    if (Game.can_sting?(game, player_name)) do
-      {result, g} = Game.sting(game, opponent, target)
-      if (result == :ok) do
-        BackupAgent.put(socket.assigns[:name], g)     
-        #TODO for some reason broadcasting same client view to all players...
-        broadcast socket, "update_view", Game.client_view(g, player_name)
-
-        {:noreply, socket}
-        # {:reply, {:ok, %{"game" => Game.client_view(g, player_name)}}, socket}
-      else
-        broadcast socket, "error", Game.client_view(game, socket.assigns[:user])
-        {:error, %{reason: g}}
-      end
-
-
-      {:reply, {:waiting, %{"game" => Game.client_view(game, player_name)}}, socket}
-    else
-      broadcast socket, "error", Game.client_view(game, socket.assigns[:user])
-      {:reply, :error, %{reason: "invalid sting"}} # TODO
-    end
+    GameServer.sting(game_name, opponent, target)
+    {:noreply, socket}
   end
-
-  # defp update_state(socket, game) do
-  #    name = socket.assigns[:name]
-  #    socket = assign(socket, :game, game)
-  #    BackupAgent.put(name, game)
-  #    {:reply, {:ok, %{ "game" => Game.client_view(game)}}, socket}
-  #  end
 
   defp authorized?(game_name, player_name) do
     # TODO game is not full OR player is already in that game and re-connecting
