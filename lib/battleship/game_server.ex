@@ -22,8 +22,8 @@ defmodule Battleship.GameServer do
   end
 
   def start_link(game_name) do
-    # game = Battleship.BackupAgent.get(game_name) || Game.new()
-    GenServer.start_link(__MODULE__, %{}, name: __MODULE__)
+    game = BackupAgent.get(game_name) || Game.new()
+    GenServer.start_link(__MODULE__, game, name: reg(game_name))
   end
 
   # runs after server is started with start_link
@@ -32,25 +32,18 @@ defmodule Battleship.GameServer do
   end
 
   def join(game_name, player_name) do
-    # GenServer.cast(reg(game_name), {:join, game_name, player_name})
-    GenServer.cast(__MODULE__, {:join, game_name, player_name})
-  end
-
-  def get_game(game_name) do
-    GenServer.call(__MODULE__, {:get_game, game_name})
+    if (length(Registry.lookup(Battleship.GameReg, game_name)) == 0) do
+      start_link(game_name)
+    end
+    GenServer.cast(reg(game_name), {:join, game_name, player_name})
   end
 
   def place_caterpillar(game_name, player_name, type, start_x, start_y, horizontal) do
-    GenServer.call(__MODULE__, {:place, game_name, player_name, type, start_x, start_y, horizontal})  
+    GenServer.call(reg(game_name), {:place, game_name, player_name, type, start_x, start_y, horizontal})
   end
 
-  # def view(game_name, player_name) do
-  #   GenServer.call(__MODULE__, {:view, game_name, player_name})
-  # end
-
-  defp get_game(game_name, state) do
-    backup = BackupAgent.get(game_name) || Game.new()
-    Map.get(state, reg(game_name), backup)
+  def get_game(game_name) do
+    BackupAgent.get(game_name) || Game.new()
   end
 
   # # TODO make sure to have a handle_call sting
@@ -58,24 +51,18 @@ defmodule Battleship.GameServer do
   #   GenServer.call(__MODULE__, {:sting, game_name, user_name, coordinate})
   # end
 
-  # # TODO place
-  # def place(game_name, coordinate, direction, user_name) do
-  #   GenServer.call(__MODULE__, {:place, game_name})
-  # end
-
 
   # Server Logic
 
-  def handle_cast({:join, game_name, player_name}, state) do
-    game = Game.add_player(get_game(game_name, state), player_name)
+  def handle_cast({:join, game_name, player_name}, _state) do
+    game = Game.add_player(get_game(game_name), player_name)
     BackupAgent.put(game_name, game)
-
     broadcast(game, game_name)
-    {:noreply, Map.put(state, reg(game_name), game)}
+    {:noreply, game}
   end
 
   def handle_call({:place, game_name, player_name, type, start_x, start_y, horizontal}, _from, state) do
-    game = get_game(game_name, state)
+    game = get_game(game_name)
     {result, g} = Game.place_caterpillar(game, player_name, type, start_x, start_y, horizontal)
     BackupAgent.put(game_name, g)     
 
@@ -83,26 +70,8 @@ defmodule Battleship.GameServer do
       :ok -> broadcast(g, game_name)
       :error -> broadcast(g, game_name) # TODO add helpful error msg
     end
-      {:reply, game, game} # TODO idk if this is right
+      {:reply, game, game}
   end
-
-  def handle_call({:get_game, game_name}, _from, state) do
-    game = get_game(game_name, state)
-    {:reply, game, game}
-  end
-
-  # def handle_call({:view, game_name, player_name}, _from, state) do
-  #   game = Map.get(state, game_name, Game.new)
-  #   # {:reply, Game.client_view(game, player_name), Map.put(state, game_name, game)}
-  #   Hangman.BackupAgent.put(game_name, game)
-  #   {:reply, game, game}
-  # end
-
-  # def handle_cast({:join, game_name, user_name}, _from, state) do
-  #   game = Game.add_player(get_game(game_name, state), user_name)
-  #   broadcast(Game.client_view(game), game_name)
-  #   {:noreply, Map.put(state, game_name, game)}
-  # end
 
   # def handle_call({:sting, game_name, opponent, target}, _from, state) do
   #   game = get_game(game_name, state)
@@ -114,14 +83,6 @@ defmodule Battleship.GameServer do
 
   # # TODO
   # def handle_call({:new, _name}, _from, game) do
-  #   {:reply, game, game}
-  # end
-
-  # # TODO
-  # def handle_call({:place, game_name, user_name, type, start_x, start_y, direction}, _from, game) do
-  #   game = Game.place_caterpillar(game, user_name, type, start_x, start_y, direction)
-  #   Battleship.BackupAgent.put(game_name, game)
-  #   broadcast(Game.client_view(game), game_name)
   #   {:reply, game, game}
   # end
 
