@@ -45,11 +45,11 @@ export default class SetUpForm extends React.Component {
       <form>
         Caterpillar: 
         <select name="caterpillar" value={this.state.caterpillar} onChange={this.handleCaterpillarChange}>
-          <option value="carrier">Carrier</option>
-          <option value="battleship">Battleship</option>
-          <option value="cruiser">Cruiser</option>
-          <option value="submarine">Submarine</option>
-          <option value="destroyer">Destroyer</option>
+          <option value="carrier">Carrier (5)</option>
+          <option value="battleship">Battleship (4)</option>
+          <option value="destroyer">Destroyer (3)</option>
+          <option value="submarine">Submarine (3)</option>
+          <option value="patrol">Patrol (2)</option>
         </select>
         Start X: <input type="number" min={1} max={this.props.maxX} onChange={this.handleXChange} />
         Start Y: <input type="number" min={1} max={this.props.maxY} onChange={this.handleYChange} />

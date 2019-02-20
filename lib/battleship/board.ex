@@ -5,9 +5,9 @@ defmodule Battleship.Board do
       caterpillars: %{
         carrier:    [nil, nil, nil, nil, nil],
         battleship: [nil, nil, nil, nil],
-        cruiser:    [nil, nil, nil],
+        destroyer:    [nil, nil, nil],
         submarine:  [nil, nil, nil],
-        destroyer:  [nil, nil]
+        patrol:  [nil, nil]
         },
       status: %{} # map from coordinate {x, y} to status ("hit" or "miss")
     }
@@ -125,9 +125,9 @@ defmodule Battleship.Board do
     case type do
       :carrier -> 5
       :battleship -> 4
-      :cruiser -> 3
+      :destroyer -> 3
       :submarine -> 3
-      :destroyer -> 2
+      :patrol -> 2
     end
   end
 
