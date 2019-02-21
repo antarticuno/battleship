@@ -16,7 +16,7 @@ defmodule BattleshipWeb.GamesChannel do
       GameServer.join(game_name, player_name)
       {:ok, socket}
     else
-      {:error, %{reason: "unauthorized"}}
+      {:error, %{reason: "unauthorized", message: "This game is full!"}}
     end
   end
 

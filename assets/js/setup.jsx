@@ -52,8 +52,10 @@ export default class SetUpForm extends React.Component {
           <option value="submarine">Submarine (3)</option>
           <option value="patrol">Patrol (2)</option>
         </select>
-        Start X: <input type="number" min={1} max={this.props.maxX} value={this.state.startX} onChange={this.handleXChange} />
-        Start Y: <input type="number" min={1} max={this.props.maxY} value={this.state.startY} onChange={this.handleYChange} />
+        <div>
+          <div className="inline inline-1"> Start X: <input type="number" min={1} max={this.props.maxX} value={this.state.startX} onChange={this.handleXChange} /></div>
+          <div className="inline inline-2">Start Y: <input type="number" min={1} max={this.props.maxY} value={this.state.startY} onChange={this.handleYChange} /></div>
+        </div>
         Direction: 
         <select value={this.state.isHorizontal} onChange={this.handleDirectionChange}>
           <option value="true">Horizontal</option>

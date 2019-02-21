@@ -1,41 +1,71 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import _ from 'lodash';
-// import $ from 'jquery';
 import SetupForm from './setup';
-import PlayerInput from './player-input';
 import {PlayerBoard, EnemyBoards} from './boards';
 
 export default function game_init(root, channel) {
   ReactDOM.render(<Battleship channel={channel} />, root);
 }
 
+const INITIAL_STATE = {
+  my_board: {},
+  opponents: {},
+  my_turn: false,
+  board_size: {},
+  rankings: [],         // array of names of players who have lost
+  phase: "joining",     // joining, setup, playing, gameover phases
+};
+
+// interfaces with the channel
 class Battleship extends React.Component {
   constructor(props) {
     super(props);
     this.channel = props.channel;
 
     this.state = {
-	    my_board: {},
-	    opponents: {},
-	    my_turn: false,
-	    board_size: {},
-	    rankings: [],         // array of names of players who have lost
-	    phase: "joining",     // joining, setup, playing, gameover phases
-    };
+      error: "", 
+      game: INITIAL_STATE
+    }
+
+    this.updateGame = this.updateGame.bind(this);
+    this.handleError = this.handleError.bind(this);
+    this.onPlace = this.onPlace.bind(this);
+    this.onSting = this.onSting.bind(this);
+    this.onNewGame = this.onNewGame.bind(this);
 
     this.channel
       .join()
-      .receive("ok", this.gotView.bind(this))
-      .receive("error", resp => { console.error("Unable to join", resp); });
+      .receive("ok", this.updateGame)
+      .receive("error", err => { this.handleError(err)});
 
-    this.channel.on("update_view", this.gotView.bind(this));
-    this.channel.on("error", err => { console.error(err); });
+    this.channel.on("update_view", this.updateGame);
+    this.channel.on("error", this.handleError);
   }
 
-  gotView(view) {
-    console.log("got_view", view);
-    this.setState(view);
+  updateGame(game) {
+    console.log("game", game);
+    this.setState({game: game});
+  }
+
+  handleError(error) {
+    console.error(error);
+    this.setState({error: error})
+  }
+
+  render() {
+    return (
+      <div>
+        <ErrorMessage reason={this.state.error.reason} message={this.state.error.message} />
+        <Game 
+          game={this.state.game} 
+          playerName={window.playerName}
+          onPlace={this.onPlace}
+          onSting={this.onSting}
+          onNewGame={this.onNewGame}
+        />
+      </div>
+    );
   }
 
   onPlace(type, startX, startY, isHorizontal) {
@@ -49,7 +79,7 @@ class Battleship extends React.Component {
   }
 
   onSting(x, y, opponent) {
-    if (this.state.my_turn) {
+    if (this.state.game.my_turn) {
       let sting = {
         x: _.parseInt(x),
         y: _.parseInt(y),
@@ -62,12 +92,33 @@ class Battleship extends React.Component {
   onNewGame() {
     this.channel.push("new", []);
     // redirect to lobby
-    let url = window.location.href.split("/game");
-    window.location.replace(url[0]);
+    redirectToLobby();
+  }
+}
+
+function redirectToLobby() {
+  let url = window.location.href.split("/game");
+  window.location.replace(url[0]);
+}
+
+function ErrorMessage(props) {
+  if (!props.message) {
+    return false;
+  }
+
+  let action = props.reason == "unauthorized" ? <button onClick={redirectToLobby}>Return to Lobby</button> : false;
+
+  return <div className="error-message"><p>{props.message}</p>{action}</div>;
+}
+
+// renders the game states
+class Game extends React.Component {
+  constructor(props) {
+    super(props);
   }
 
   render() {
-    switch (this.state.phase) {
+    switch (this.props.game.phase) {
       case "joining":
 	      return this.renderJoining();
         break;
@@ -95,17 +146,17 @@ class Battleship extends React.Component {
         <div className="row">
         <div className="column">
           <PlayerBoard 
-            myBoard={this.state.my_board} 
-            width={this.state.board_size.width}
-            height={this.state.board_size.height}
-            status={this.state.status}
+            myBoard={this.props.game.my_board} 
+            width={this.props.game.board_size.width}
+            height={this.props.game.board_size.height}
+            status={this.props.game.status}
           />
         </div>
           <div className="column">
             <SetupForm 
-              maxX={this.state.board_size.width}
-              maxY={this.state.board_size.height}
-              onSubmit={this.onPlace.bind(this)}
+              maxX={this.props.game.board_size.width}
+              maxY={this.props.game.board_size.height}
+              onSubmit={this.props.onPlace}
             />
         </div>
       </div>
@@ -115,19 +166,19 @@ class Battleship extends React.Component {
 
   renderPlaying() {
     let opponentNames = [];
-    _.forIn(this.state.opponents, function(value, key) {
+    _.forIn(this.props.game.opponents, function(value, key) {
       opponentNames.push(key);
     });
     // for games with > 2 players...
-    if (this.state.rankings.includes(window.playerName)) {
+    if (this.props.game.rankings.includes(window.playerName)) {
       return (
       	<div className="container">
-      	  <h1>You Lost</h1>
+      	  <h1>You Lost! Observing...</h1>
           <EnemyBoards
-            onClick={this.onSting.bind(this)}
-            opponents={this.state.opponents}
-            width={this.state.board_size.width}
-            height={this.state.board_size.height}
+            onClick={() => {}} // can't sting if lost
+            opponents={this.props.game.opponents}
+            width={this.props.game.board_size.width}
+            height={this.props.game.board_size.height}
           />
       	</div>
       );
@@ -137,20 +188,20 @@ class Battleship extends React.Component {
           <div className="row">
             <div className="column">
               <PlayerBoard 
-                myBoard={this.state.my_board} 
-                width={this.state.board_size.width}
-                height={this.state.board_size.height}
-                status={this.state.status}
-                name={window.playerName}
+                myBoard={this.props.game.my_board} 
+                width={this.props.game.board_size.width}
+                height={this.props.game.board_size.height}
+                status={this.props.game.status}
+                name={this.props.playerName}
               />  
-             <PlayerTurn turn={this.state.my_turn} /> 
+             <PlayerTurn turn={this.props.game.my_turn} /> 
             </div>
             <div className="column">
               <EnemyBoards 
-      	        onClick={this.onSting.bind(this)}
-                opponents={this.state.opponents} 
-                width={this.state.board_size.width} 
-                height={this.state.board_size.height}
+      	        onClick={this.props.onSting}
+                opponents={this.props.game.opponents} 
+                width={this.props.game.board_size.width} 
+                height={this.props.game.board_size.height}
               />
             </div>
           </div>
@@ -163,8 +214,8 @@ class Battleship extends React.Component {
     return (
       <div>
         <h3>Game Over!</h3>
-        <ScoreBoard rankings={this.state.rankings} />
-        <p><button onClick={this.onNewGame.bind(this)}>Play Again?</button></p>
+        <ScoreBoard rankings={this.props.game.rankings} />
+        <p><button onClick={this.props.onNewGame}>Play Again?</button></p>
       </div>
     );
   }
