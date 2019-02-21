@@ -24,7 +24,7 @@ class Battleship extends React.Component {
     this.channel = props.channel;
 
     this.state = {
-      error: "", 
+      error: {}, 
       game: INITIAL_STATE
     }
 
@@ -33,6 +33,7 @@ class Battleship extends React.Component {
     this.onPlace = this.onPlace.bind(this);
     this.onSting = this.onSting.bind(this);
     this.onNewGame = this.onNewGame.bind(this);
+    this.onCloseError = this.onCloseError.bind(this);
 
     this.channel
       .join()
@@ -56,7 +57,7 @@ class Battleship extends React.Component {
   render() {
     return (
       <div>
-        <ErrorMessage reason={this.state.error.reason} message={this.state.error.message} />
+        <ErrorMessage reason={this.state.error.reason} message={this.state.error.message} onClick={this.onCloseError} />
         <Game 
           game={this.state.game} 
           playerName={window.playerName}
@@ -66,6 +67,10 @@ class Battleship extends React.Component {
         />
       </div>
     );
+  }
+
+  onCloseError() {
+    this.setState({error: {}});
   }
 
   onPlace(type, startX, startY, isHorizontal) {
@@ -91,7 +96,6 @@ class Battleship extends React.Component {
 
   onNewGame() {
     this.channel.push("new", []);
-    // redirect to lobby
     redirectToLobby();
   }
 }
@@ -107,8 +111,13 @@ function ErrorMessage(props) {
   }
 
   let action = props.reason == "unauthorized" ? <button onClick={redirectToLobby}>Return to Lobby</button> : false;
-
-  return <div className="error-message"><p>{props.message}</p>{action}</div>;
+  return (
+    <div className="error-message">
+      <p>{props.message}</p>
+      {action}
+      <div className="close" onClick={props.onClick}>✕</div>
+    </div>
+  );
 }
 
 // renders the game states

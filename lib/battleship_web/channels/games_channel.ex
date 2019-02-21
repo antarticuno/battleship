@@ -4,7 +4,7 @@ defmodule BattleshipWeb.GamesChannel do
   alias Battleship.Game
   alias Battleship.GameServer
 
-  intercept ["update"]
+  intercept ["update", "error"]
 
   def join("games:" <> game_name, payload, socket) do
     player_name = Map.get(payload, "player_name")
@@ -29,6 +29,15 @@ defmodule BattleshipWeb.GamesChannel do
     {:noreply, socket}
   end
 
+  # only show error message to the player that caused it
+  def handle_out("error", err, socket) do
+    player_name = socket.assigns[:user]
+    if (player_name == err.recipient) do
+      push socket, "error", err.error
+    end
+    {:noreply, socket}
+  end
+
   def handle_in("place", %{ "type" => type, "start_x" => start_x, "start_y" => start_y, "horizontal?" => horizontal}, socket) do
     game_name = socket.assigns[:game]
     game = GameServer.get_game(game_name)
@@ -41,9 +50,10 @@ defmodule BattleshipWeb.GamesChannel do
 
   def handle_in("sting", %{"opponent" => opponent, "x" => x, "y" => y}, socket) do
     game_name = socket.assigns[:game]
+    player_name = socket.assigns[:user]
     target = {x, y}
 
-    GameServer.sting(game_name, opponent, target)
+    GameServer.sting(game_name, player_name, opponent, target)
     {:noreply, socket}
   end
 
