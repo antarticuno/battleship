@@ -50,8 +50,8 @@ defmodule Battleship.GameServer do
     GenServer.call(reg(game_name), {:place, game_name, player_name, type, start_x, start_y, horizontal})
   end
 
-  def sting(game_name, opponent, coordinate) do
-    GenServer.call(reg(game_name), {:sting, game_name, opponent, coordinate})
+  def sting(game_name, player_name, opponent, coordinate) do
+    GenServer.call(reg(game_name), {:sting, game_name, player_name, opponent, coordinate})
   end
 
   def get_game(game_name) do
@@ -69,20 +69,24 @@ defmodule Battleship.GameServer do
 
   def handle_call({:place, game_name, player_name, type, start_x, start_y, horizontal}, _from, _state) do
     game = get_game(game_name)
-    {result, g} = Game.place_caterpillar(game, player_name, type, start_x, start_y, horizontal)
-    update_and_broadcast(game_name, {result, g})
+    g = Game.place_caterpillar(game, player_name, type, start_x, start_y, horizontal)
+    update_and_broadcast(game_name, player_name, g)
   end
 
-  def handle_call({:sting, game_name, opponent, target}, _from, _state) do
+  def handle_call({:sting, game_name, player_name, opponent, target}, _from, _state) do
     game = get_game(game_name)
-    update_and_broadcast(game_name, Game.sting(game, opponent, target))
+    update_and_broadcast(game_name, player_name, Game.sting(game, opponent, target))
   end
 
-  defp update_and_broadcast(game_name, {result, game}) do
-    if result == :error do
-      # TODO have some sort of try again message
-    end
+  defp update_and_broadcast(game_name, player_name, {:error, error, game}) do
+    Battleship.BackupAgent.put(game_name, game)
+    error =  %{reason: "invalid move", message: error}
+    broadcast_error(error, game_name, player_name)
+    broadcast(game, game_name)
+    {:reply, game, game}
+  end
 
+  defp update_and_broadcast(game_name, _player_name, {:ok, game}) do
     Battleship.BackupAgent.put(game_name, game)
     broadcast(game, game_name)
     {:reply, game, game}
@@ -90,5 +94,9 @@ defmodule Battleship.GameServer do
 
   defp broadcast(state, game_name) do
     BattleshipWeb.Endpoint.broadcast("games:" <> game_name, "update", state)
+  end
+
+  defp broadcast_error(error, game_name, player_name) do
+    BattleshipWeb.Endpoint.broadcast("games:" <> game_name, "error", %{recipient: player_name, error: error})
   end
 end

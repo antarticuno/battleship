@@ -2,7 +2,7 @@ defmodule Battleship.Game do
 
   alias Battleship.Board
 
-  @num_players 3 # in the interest of scope, limit to two players
+  @num_players 2 # in the interest of scope, limit to two players
 
   def new do
     %{
@@ -65,7 +65,7 @@ defmodule Battleship.Game do
       game = set_player_board(game, player_name, board)
       {:ok, game}
     else
-      {:error, game}  
+      {:error, "Invalid Placement", game}  
     end
   end
 
@@ -85,11 +85,10 @@ defmodule Battleship.Game do
       |> set_player_board(opponent, board)
       |> next_player
       |> winning_player
-      # |> advance_phase
 
       {:ok, game}  
     else
-      {:error, game}
+      {:error, "Invalid Sting", game}
     end
   end
 

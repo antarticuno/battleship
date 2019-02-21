@@ -12,14 +12,44 @@ button.disabled {
 
 .inline {
   display: inline-block;
-  margin-right: 20px;
+  padding-right: 20px;
 }
 
-.board-cell {
+.inline-1 {
+  width: calc(50% + 10px);
+}
+
+.inline-2 {
+  width: calc(50% - 10px);
+  padding-right: 0;
+}
+
+.column.board-cell {
   text-align: center;
+  border: 0.1rem solid #d1d1d1;
+  height: 4.3rem;
+  padding: .8rem 1rem .8rem;
+}
+
+.column.board-cell.label {
+  padding-bottom: 0;
+  height: auto;
+}
+
+.opponent-boards .board-cell {
+  cursor: pointer;
+}
+
+.opponent-boards .board-cell.dead,
+.opponent-boards .board-cell.hit,
+.opponent-boards .board-cell.miss,
+.opponent-boards .board-cell.label {
+  cursor: default;
 }
 
 .board-cell.label {
+  border:none;
+  cursor: default;
   font-weight: 400;
 }
 
@@ -37,4 +67,27 @@ button.disabled {
 
 #sting-message {
   margin: 20px;
+}
+
+.error-message {
+  background-color: #fff3cd;
+  border-color: #ffeeba;
+  color: #856404;
+  padding: .75rem 1.25rem;
+  position: relative;
+  border-radius: .25rem;
+  margin-bottom: 1rem;
+}
+.error-message p {
+  margin-bottom: 0;
+}
+.error-message button {
+  margin-top: 1rem;
+}
+.error-message .close {
+  cursor: pointer;
+  position: absolute;
+  right: 0;
+  top: 0;
+  padding: 1rem;
 }
