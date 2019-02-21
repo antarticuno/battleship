@@ -33,6 +33,10 @@ button.disabled {
   padding: .8rem 1rem .8rem;
 }
 
+.battleship-container {
+  background: url('/images/board_bg.png');
+}
+
 .column.board-cell.label {
   padding-bottom: 0;
   height: auto;
@@ -42,9 +46,16 @@ button.disabled {
   cursor: pointer;
 }
 
-.opponent-boards .board-cell.dead,
-.opponent-boards .board-cell.hit,
-.opponent-boards .board-cell.miss,
+.opponent-boards .board-cell.dead {
+  background-image: url('/images/caterpillar_dead.png');
+}
+
+.opponent-boards .board-cell.hit {
+  background-image: url('/images/caterpillar_hit.png');
+}
+.opponent-boards .board-cell.miss {
+  background-image: url('/images/caterpillar_miss.png');
+}
 .opponent-boards .board-cell.label {
   cursor: default;
 }
@@ -56,7 +67,7 @@ button.disabled {
 }
 
 .board-cell.caterpillar {
-  background-color: #ddd;
+  background-image: url('/images/caterpillar.png');
 }
 
 .sting {
