@@ -37,7 +37,7 @@ class Battleship extends React.Component {
 
     this.channel
       .join()
-      .receive("ok", this.updateGame)
+      .receive("ok", () => {})
       .receive("error", err => { this.handleError(err)});
 
     this.channel.on("update_view", this.updateGame);

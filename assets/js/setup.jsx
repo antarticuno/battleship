@@ -43,6 +43,7 @@ export default class SetUpForm extends React.Component {
 
   render() {
     return (
+      <div className="setup">
       <form>
         Caterpillar: 
         <select name="caterpillar" value={this.state.caterpillar} onChange={this.handleCaterpillarChange}>
@@ -63,6 +64,7 @@ export default class SetUpForm extends React.Component {
         </select>
         <button onClick={this.onSubmit.bind(this)}>Place!</button>
       </form>
+      </div>
     );
   }
 }
