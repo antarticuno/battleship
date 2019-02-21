@@ -19,7 +19,6 @@ defmodule BattleshipWeb.Router do
 
     get "/", PageController, :index
     get "/game", PageController, :redirect_to_index
-    # get "/game/:name", PageController, :observe
     get "/game/:name", PageController, :game
     post "/game", PageController, :game
     resources "/sessions", SessionController, only: [:create, :delete], singleton: true
