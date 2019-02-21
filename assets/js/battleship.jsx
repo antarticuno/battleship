@@ -146,14 +146,14 @@ class Game extends React.Component {
   }
 
   renderJoining() {
-    return (<div className="container">Waiting for other players to join...</div>);
+    return <div className="container">Waiting for other players to join...</div>;
   }
 
   renderSetup() {
     return (
-      <div className="container">
+      <div className="container battleship-container">
         <div className="row">
-        <div className="column">
+        <div className="col column">
           <PlayerBoard 
             myBoard={this.props.game.my_board} 
             width={this.props.game.board_size.width}
@@ -161,7 +161,7 @@ class Game extends React.Component {
             status={this.props.game.status}
           />
         </div>
-          <div className="column">
+          <div className="col column">
             <SetupForm 
               maxX={this.props.game.board_size.width}
               maxY={this.props.game.board_size.height}
@@ -193,9 +193,12 @@ class Game extends React.Component {
       );
     } else {  
       return (
-        <div className="container">
+        <div className="battleship-container container">
           <div className="row">
-            <div className="column">
+            <PlayerTurn turn={this.props.game.my_turn} /> 
+          </div>
+          <div className="row">
+            <div className="col column">
               <PlayerBoard 
                 myBoard={this.props.game.my_board} 
                 width={this.props.game.board_size.width}
@@ -203,9 +206,8 @@ class Game extends React.Component {
                 status={this.props.game.status}
                 name={this.props.playerName}
               />  
-             <PlayerTurn turn={this.props.game.my_turn} /> 
             </div>
-            <div className="column">
+            <div className="col column">
               <EnemyBoards 
       	        onClick={this.props.onSting}
                 opponents={this.props.game.opponents} 
@@ -243,6 +245,6 @@ function ScoreBoard(props) {
 
 function PlayerTurn(props) {
   let {turn} = props;
-  if (turn) return <div id="sting-message"><h4>Click an opponent's board to sting!</h4></div>;
-  else return <div id="sting-message"><h6>Be patient! Your opponents are taking aim...</h6></div>;
+  let message = turn ? <h4>Click an opponent's board to sting!</h4> : <h6>Be patient! Your opponents are taking aim...</h6>;
+  return <div className="col column" id="sting-message">{message}</div>;
 }

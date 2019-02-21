@@ -2,12 +2,14 @@
 
 @import "~milligram/dist/milligram";
 
-/* TODO: mobile styling */
-
 button.disabled {
   pointer-events: none;
   background-color: #606c76;
   border-color: #606c76;
+}
+
+.index-forms {
+  max-width: 40%;
 }
 
 .inline {
@@ -66,7 +68,17 @@ button.disabled {
 }
 
 #sting-message {
-  margin: 20px;
+  color: #004085;
+  background-color: #cce5ff;
+  border-color: #b8daff;
+  padding: .75rem 1.25rem;
+  border-radius: .25rem;
+  margin-bottom: 1rem;
+}
+
+#sting-message h6,
+#sting-message h4 {
+  margin-bottom: 0;
 }
 
 .error-message {
@@ -90,4 +102,48 @@ button.disabled {
   right: 0;
   top: 0;
   padding: 1rem;
+}
+
+/* Mobile */
+@media (max-width: 40rem) {
+  .index-forms {
+    max-width: 100%;
+  }
+
+  .column.board-cell {
+    height: 2.8rem;
+    padding: 0;
+  }
+
+  .battleship-container {
+    padding: 0;
+  }
+
+  .battleship-row {
+    flex-direction: row;
+  }
+
+  .col {
+    margin-bottom: inherit;
+    padding: 0 1.0rem;
+  }
+
+  .setup,
+  .opponent-boards {
+    margin-top: 30px;
+  }
+}
+
+@media (min-width: 600px) {
+  .board-cell {
+    height: 100px;
+    padding-top: 3.1rem;
+  }
+}
+
+@media (min-width: 768px) {
+  .board-cell {
+    height: 125px;
+    padding-top: 4.4rem;
+  }
 }
