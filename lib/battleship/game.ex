@@ -2,7 +2,7 @@ defmodule Battleship.Game do
 
   alias Battleship.Board
 
-  @num_players 2 # in the interest of scope, limit to two players
+  @num_players 2
 
   def new do
     %{

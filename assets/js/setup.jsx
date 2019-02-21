@@ -8,8 +8,8 @@ export default class SetUpForm extends React.Component {
 
     this.state = {
       caterpillar: "carrier",
-      startX: 0,
-      startY: 0,
+      startX: "0",
+      startY: "0",
       isHorizontal: "true"
     }
 
@@ -44,6 +44,7 @@ export default class SetUpForm extends React.Component {
   render() {
     return (
       <div className="setup">
+      <h4>Place Caterpillars</h4>
       <form>
         Caterpillar: 
         <select name="caterpillar" value={this.state.caterpillar} onChange={this.handleCaterpillarChange}>
@@ -62,7 +63,7 @@ export default class SetUpForm extends React.Component {
           <option value="true">Horizontal</option>
           <option value="false">Vertical</option>
         </select>
-        <button onClick={this.onSubmit.bind(this)}>Place!</button>
+        <button onClick={this.onSubmit.bind(this)}>Place</button>
       </form>
       </div>
     );

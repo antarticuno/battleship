@@ -163,8 +163,8 @@ class Game extends React.Component {
         </div>
           <div className="col column">
             <SetupForm 
-              maxX={this.props.game.board_size.width}
-              maxY={this.props.game.board_size.height}
+              maxX={this.props.game.board_size.width - 1}
+              maxY={this.props.game.board_size.height - 1}
               onSubmit={this.props.onPlace}
             />
         </div>
@@ -245,6 +245,6 @@ function ScoreBoard(props) {
 
 function PlayerTurn(props) {
   let {turn} = props;
-  let message = turn ? <h4>Click an opponent's board to sting!</h4> : <h6>Be patient! Your opponents are taking aim...</h6>;
+  let message = turn ? <h4>Click opponent's board to sting!</h4> : <h6>Be patient! Your opponents are taking aim...</h6>;
   return <div className="col column" id="sting-message">{message}</div>;
 }
