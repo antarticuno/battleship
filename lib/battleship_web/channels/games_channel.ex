@@ -54,8 +54,7 @@ defmodule BattleshipWeb.GamesChannel do
   end
 
   defp authorized?(game_name, player_name) do
-    # TODO game is not full OR player is already in that game and re-connecting
-    # Game.waiting_for_players?(game) || Game.has_player?(game, player_name)
-    true
+    game = GameServer.get_game(game_name)
+    !Game.enough_players?(game) || Game.has_player?(game, player_name)
   end
 end

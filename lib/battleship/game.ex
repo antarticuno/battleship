@@ -22,7 +22,6 @@ defmodule Battleship.Game do
                   |> Enum.map(fn {pn, board} -> {pn, Board.client_opponent_board(board)} end)
                   |> Map.new,  # Map from player_name to Board status
       my_turn: game.turn == player_name,               
-      lost: Enum.member?(game.rankings, player_name),
       board_size: game.board_size,
       rankings: game.rankings,
       phase: get_game_phase(game)  # one of: "joining", "setup", "playing", "gameover"
@@ -153,6 +152,4 @@ defmodule Battleship.Game do
     setup_done?(game) &&
     length(remaining_players(game)) <= 1
   end
-
-  def player_lost?(game, player_name), do: Board.lost?(get_player_board(game, player_name))
 end

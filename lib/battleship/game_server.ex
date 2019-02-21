@@ -60,7 +60,6 @@ defmodule Battleship.GameServer do
 
   # Server Logic
 
-  # TODO handle adding observers to the game?
   def handle_cast({:join, game_name, player_name}, _state) do
     game = Game.add_player(get_game(game_name), player_name)
     BackupAgent.put(game_name, game)
