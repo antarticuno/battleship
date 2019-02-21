@@ -125,10 +125,6 @@ defmodule Battleship.Game do
 
   # Game Status -----------------------------------------------------------------------------------
 
-  # def advance_phase(game) do
-  #   Map.put(game, :phase, get_game_phase(game))
-  # end
-
   # one of: "joining", "setup", "playing", "gameover"
   def get_game_phase(game) do
     cond do

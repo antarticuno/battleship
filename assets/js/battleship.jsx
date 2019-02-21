@@ -19,7 +19,6 @@ class Battleship extends React.Component {
 	    my_board: {},
 	    opponents: {},
 	    my_turn: false,
-	    lost: false,
 	    board_size: {},
 	    rankings: [],         // array of names of players who have lost
 	    phase: "joining",     // joining, setup, playing, gameover phases
@@ -163,7 +162,6 @@ function ScoreBoard(props) {
 
 function PlayerTurn(props) {
   let {turn} = props;
-  console.log(turn);
   if (turn) return <div id="sting-message"><h4>Time to Sting!</h4></div>;
   else return <div id="sting-message"><h6>Be patient! Your opponents are taking aim...</h6></div>;
 }

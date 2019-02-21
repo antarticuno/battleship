@@ -9,7 +9,7 @@ defmodule Battleship.Board do
         submarine:  [nil, nil, nil],
         patrol:  [nil, nil]
         },
-      status: %{} # map from coordinate {x, y} to status ("hit" or "miss")
+      status: %{} # map from coordinate {x, y} to status ("hit" or "miss" or "sunk")
     }
   end
 
@@ -135,7 +135,7 @@ defmodule Battleship.Board do
 
   def dead?(caterpillar, status) do
     caterpillar
-    |> Enum.all?(&(Map.get(status, &1) == "hit"))
+    |> Enum.all?(&(Map.get(status, &1) != "miss" && Map.get(status, &1) != nil))
   end
 
   def lost?(board) do
