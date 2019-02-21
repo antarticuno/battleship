@@ -31,6 +31,14 @@ defmodule Battleship.GameServer do
     {:ok, state}
   end
 
+  def end_game(game_name) do
+    IO.puts("removing " <> game_name)
+    Registry.unregister(Battleship.GameReg, game_name)
+    BackupAgent.remove(game_name)
+    IO.inspect BackupAgent.get(game_name)
+    IO.puts(length(Registry.lookup(Battleship.GameReg, game_name)))
+  end
+
   def join(game_name, player_name) do
     if (length(Registry.lookup(Battleship.GameReg, game_name)) == 0) do
       start_link(game_name)
@@ -52,7 +60,6 @@ defmodule Battleship.GameServer do
 
   # Server Logic
 
-  # TODO handle adding observers to the game?
   def handle_cast({:join, game_name, player_name}, _state) do
     game = Game.add_player(get_game(game_name), player_name)
     BackupAgent.put(game_name, game)
@@ -72,8 +79,8 @@ defmodule Battleship.GameServer do
   end
 
   defp update_and_broadcast(game_name, {result, game}) do
-    unless result == :error do
-      game = Game.advance_phase(Game.next_player(game))
+    if result == :error do
+      # TODO have some sort of try again message
     end
 
     Battleship.BackupAgent.put(game_name, game)

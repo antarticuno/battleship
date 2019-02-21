@@ -2,7 +2,7 @@ defmodule Battleship.Game do
 
   alias Battleship.Board
 
-  @num_players 2 # in the interest of scope, limit to two players
+  @num_players 3 # in the interest of scope, limit to two players
 
   def new do
     %{
@@ -22,7 +22,6 @@ defmodule Battleship.Game do
                   |> Enum.map(fn {pn, board} -> {pn, Board.client_opponent_board(board)} end)
                   |> Map.new,  # Map from player_name to Board status
       my_turn: game.turn == player_name,               
-      lost: Enum.member?(game.rankings, player_name),
       board_size: game.board_size,
       rankings: game.rankings,
       phase: get_game_phase(game)  # one of: "joining", "setup", "playing", "gameover"
@@ -42,7 +41,7 @@ defmodule Battleship.Game do
   # Joining Game  ---------------------------------------------------------------------------------
 
   def add_player(game, player_name) do
-    if (has_player?(game, player_name)) do
+    if (has_player?(game, player_name) || get_game_phase(game) != "joining") do
       game
     else
       game 
@@ -56,15 +55,7 @@ defmodule Battleship.Game do
     Enum.member?(game.players, player_name)
   end
 
-  def waiting_for_players?(game), do: length(game.players) < @num_players
-  def enough_players?(game), do: length(game.players) == @num_players
-
   # Set-Up Phase ----------------------------------------------------------------------------------
-
-  # are players still placing pieces on their boards?
-  def setup_done?(game) do
-    length(game.players) > 0 && Enum.all?(Map.values(game.boards), fn board -> Board.all_caterpillars_placed?(board) end)
-  end
 
   def place_caterpillar(game, player_name, type, start_x, start_y, horizontal?) do
     board = get_player_board(game, player_name)
@@ -87,55 +78,78 @@ defmodule Battleship.Game do
   # ASSUMES: player whose turn it is is doing the stinging
   def sting(game, opponent, target) do
     board = Map.get(game.boards, opponent)
-
     if (Board.valid_sting?(board, target)) do
       board = Board.update_status(board, target)
-
-      if (Board.lost?(board)) do 
-        game = Map.put(game, :rankings, [opponent | Map.get(game, :rankings)])
-      end
-
       game = game
+      |> lost_player(board, opponent)
       |> set_player_board(opponent, board)
       |> next_player
+      |> winning_player
+      # |> advance_phase
 
-      if (game_over?(game)) do
-        game = Map.put(game, :rankings, [game.turn | Map.get(game, :rankings)])
-      end
       {:ok, game}  
     else
       {:error, game}
     end
   end
 
+  def lost_player(game, board, opponent) do
+    if (Board.lost?(board)) do
+      Map.put(game, :rankings, [opponent | Map.get(game, :rankings)])
+    else
+      game
+    end
+  end
+
+  def winning_player(game) do
+    if (game_over?(game)) do
+      Map.put(game, :rankings, [game.turn | Map.get(game, :rankings)])
+    else 
+      game
+    end
+  end
+
   def next_player(game) do
-    remaining_players = remaining_players(game)
-    next_index = remaining_players
-                 |> Enum.find_index(&(&1 == game.turn))
-                 |> Kernel.+(1)
-                 |> rem(length(remaining_players))
-    Map.put(game, :turn, Enum.at(remaining_players, next_index))
+    if (!game_over?(game)) do
+      remaining_players = remaining_players(game)
+      next_index = remaining_players
+                   |> Enum.find_index(&(&1 == game.turn))
+                   |> Kernel.+(1)
+                   |> rem(length(remaining_players))
+      Map.put(game, :turn, Enum.at(remaining_players, next_index))
+    else
+      game
+    end
   end
 
   # Game Status -----------------------------------------------------------------------------------
 
-  def advance_phase(game) do
-    Map.put(game, :phase, get_game_phase(game))
-  end
-
   # one of: "joining", "setup", "playing", "gameover"
   def get_game_phase(game) do
     cond do
-      waiting_for_players?(game) -> "joining"
+      game_over?(game) -> "gameover"
       setup_done?(game) -> "playing"
       enough_players?(game) -> "setup"
-      game_over?(game) -> "gameover"
+      true -> "joining"
     end
   end
 
+
+
   def remaining_players(game), do: game.players -- game.rankings
 
-  def game_over?(game), do: length(remaining_players(game)) == 0
+  # are players still placing pieces on their boards?
+  def setup_done?(game) do
+    enough_players?(game) && 
+    Enum.all?(Map.values(game.boards),
+              fn board -> Board.all_caterpillars_placed?(board) end)
+  end
 
-  def player_lost?(game, player_name), do: Board.lost?(get_player_board(game, player_name))
+  def enough_players?(game), do: length(game.players) == @num_players
+
+  def game_over?(game) do
+    enough_players?(game) &&
+    setup_done?(game) &&
+    length(remaining_players(game)) <= 1
+  end
 end

@@ -30,15 +30,15 @@ export function EnemyBoards(props) {
 
   let boards = [];
   for (let opp = 0; opp < opponentNames.length; opp++) {
-    boards.push(<Board key={opp} width={props.width} height={props.height} status={opponentStatus[opp]} name={opponentNames[opp]}/>)
+    boards.push(<Board key={opp} sting={props.onClick} width={props.width} height={props.height} status={opponentStatus[opp]} name={opponentNames[opp]}/>)
   }
-
   return (<div className="opponent-boards">{boards}</div>);
 }
 
 function Board(props) {
   let status = props.status;
   let caterpillars = _.filter(props.caterpillarCoords, null);
+  let onClick = props.sting;
   let cols = [];
   for (let c = -1; c < props.width; c++) {
     let col = [];
@@ -56,10 +56,13 @@ function Board(props) {
         
         let isHit = s == "hit";
         let isMiss = s == "miss";
-        let hit = isHit ? " hit" : isMiss ? " miss" : "";
+	let isDead = s == "dead";
+        let hit = isHit ? " hit" : isMiss ? " miss" : isDead ? "dead" : "";
+        let onClickSting = () => {if (onClick != null) {onClick(r, c, props.name);};};
+        //let onClickSting = () => {console.log(c + ", " + r + ", " + props.name + ": " + onClick)};
 
-        col.push(<div key={r} className={coord + " column board-cell" + (caterpillars.includes(coord) ? " caterpillar" : "") + hit}>
-          {isHit ? "X" : isMiss ? "O" : "_"}
+        col.push(<div key={r} onClick={onClickSting.bind(this)} className={coord + " column board-cell" + (caterpillars.includes(coord) ? " caterpillar" : "") + hit}>
+          {isHit ? "X" : isMiss ? "O" : isDead ? "D" : "_"}
         </div>);
       }
     }

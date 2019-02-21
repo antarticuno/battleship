@@ -19,7 +19,6 @@ class Battleship extends React.Component {
 	    my_board: {},
 	    opponents: {},
 	    my_turn: false,
-	    lost: false,
 	    board_size: {},
 	    rankings: [],         // array of names of players who have lost
 	    phase: "joining",     // joining, setup, playing, gameover phases
@@ -41,7 +40,6 @@ class Battleship extends React.Component {
       "start_y": _.parseInt(startY),
       "horizontal?": (isHorizontal == "true")
     };
-    console.log("place", place);
     this.channel.push("place", place);
   }
 
@@ -52,9 +50,12 @@ class Battleship extends React.Component {
         y: _.parseInt(y),
         opponent: opponent
       };
-      console.log("sting", sting);
       this.channel.push("sting", sting);
     }
+  }
+
+  onNew() {
+    this.channel.push("new", []);
   }
 
   render() {
@@ -87,7 +88,8 @@ class Battleship extends React.Component {
   }
 
   renderJoining() {
-    return (<div className="container">Waiting for other players to join...</div>);
+    return (<div className="container">Waiting for other players to join...
+	    <p><button onClick={this.onNew.bind(this)}>Play Again?</button></p></div>);
   }
 
   renderSetup() {
@@ -119,37 +121,45 @@ class Battleship extends React.Component {
     _.forIn(this.state.opponents, function(value, key) {
       opponentNames.push(key);
     });
-
-    return (
-      <div className="container">
-        <div className="row">
-          <div className="column">
-            <PlayerBoard 
-              myBoard={this.state.my_board} 
-              width={this.state.board_size.width}
-              height={this.state.board_size.height}
-              status={this.state.status}
-              name={window.playerName}
-            />  
-            {this.state.my_turn ? (<PlayerInput 
-              maxX={this.state.board_size.width - 1} 
-              maxY={this.state.board_size.height - 1} 
-              opponents={opponentNames}
-              onSubmit={this.onSting.bind(this)}
-              myTurn={this.state.my_turn}
-            />) : false}
-            
-          </div>
-          <div className="column">
-            <EnemyBoards 
-              opponents={this.state.opponents} 
-              width={this.state.board_size.width} 
-              height={this.state.board_size.height}
-            />
+    if (this.state.rankings.includes(window.playerName)) {
+      return (
+	<div className="container">
+	  <h1>You Lost</h1>
+          <EnemyBoards
+            onClick={this.onSting.bind(this)}
+            opponents={this.state.opponents}
+            width={this.state.board_size.width}
+            height={this.state.board_size.height}
+          />
+	</div>
+      );
+    }
+    else {  
+      return (
+        <div className="container">
+          <div className="row">
+            <div className="column">
+              <PlayerBoard 
+                myBoard={this.state.my_board} 
+                width={this.state.board_size.width}
+                height={this.state.board_size.height}
+                status={this.state.status}
+                name={window.playerName}
+              />  
+             <PlayerTurn turn={this.state.my_turn} /> 
+            </div>
+            <div className="column">
+              <EnemyBoards 
+	        onClick={this.onSting.bind(this)}
+                opponents={this.state.opponents} 
+                width={this.state.board_size.width} 
+                height={this.state.board_size.height}
+              />
+            </div>
           </div>
         </div>
-      </div>
-    );
+      );
+    }
   }
 
   renderGameOver() {
@@ -159,6 +169,13 @@ class Battleship extends React.Component {
 
 function ScoreBoard(props) {
   let {rankings} = props;
-  let r = _.map(rankings, (player_name, ii) => {return <p key={ii}>{ii + 1}. player_name</p>});
+  let r = _.map(rankings, (player_name, ii) => {return <p key={ii}>{ii + 1}. {player_name}</p>});
+  // TODO get this at the end: r.push(<button>Play Again?</button>);
   return r;
+}
+
+function PlayerTurn(props) {
+  let {turn} = props;
+  if (turn) return <div id="sting-message"><h4>Time to Sting!</h4></div>;
+  else return <div id="sting-message"><h6>Be patient! Your opponents are taking aim...</h6></div>;
 }
