@@ -45,11 +45,11 @@ function Board(props) {
     for (let r = -1; r < props.height; r++) {
 
       if (c == -1 && r == -1) {
-        col.push(<div key={r} className="column board-cell label"></div>);
+        col.push(<div key={r} className="col column board-cell label"></div>);
       } else if (c == -1) {
-        col.push(<div key={r} className="column board-cell label">{r}</div>);
+        col.push(<div key={r} className="col column board-cell label">{r}</div>);
       } else if (r == -1) {
-        col.push(<div key={r} className="column board-cell label">{c}</div>);
+        col.push(<div key={r} className="col column board-cell label">{c}</div>);
       } else {
         let coord = r + "," + c;
         let s = props.status[coord];
@@ -60,18 +60,18 @@ function Board(props) {
         let hit = isHit ? " hit" : isMiss ? " miss" : isDead ? "dead" : "";
         let onClickSting = () => {if (onClick != null && !isHit && !isMiss && !isDead) {onClick(r, c, props.name);};};
 
-        col.push(<div key={r} onClick={onClickSting.bind(this)} className={coord + " column board-cell " + (caterpillars.includes(coord) ? "caterpillar " : "") + hit}>
+        col.push(<div key={r} onClick={onClickSting.bind(this)} className={coord + " col column board-cell " + (caterpillars.includes(coord) ? "caterpillar " : "") + hit}>
           {isHit ? "X" : isMiss ? "O" : isDead ? "D" : " "}
         </div>);
       }
     }
-    cols.push(<div key={c} className="row">{col}</div>);
+    cols.push(<div key={c} className="row battleship-row">{col}</div>);
   }
 
   return (
     <div className="board">
       {props.name ? <h4>Board for: {props.name}</h4> : false}
-      <div className="container">
+      <div className="container battleship-container">
         {cols}
       </div>
     </div>

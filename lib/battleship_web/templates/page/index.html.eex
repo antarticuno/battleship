@@ -2,7 +2,7 @@
   <div class="column">
     <h1 id="index-page">Join a Game</h1>
   <%= form_for @conn, Routes.session_path(@conn, :create), fn f -> %>
-    <label>
+    <label class="index-forms">
       Game Name:<%= text_input f, :name, class: "form-control" %>
       Player Name: <%= text_input f, :player_name, class: "form-control" %>
     </label>
