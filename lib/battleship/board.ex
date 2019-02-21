@@ -9,7 +9,7 @@ defmodule Battleship.Board do
         submarine:  [nil, nil, nil],
         patrol:  [nil, nil]
         },
-      status: %{} # map from coordinate {x, y} to status ("hit" or "miss" or "sunk")
+      status: %{} # map from coordinate {x, y} to status ("hit" or "miss" or "dead")
     }
   end
 
@@ -52,7 +52,13 @@ defmodule Battleship.Board do
   # ASSUMES: target hasn't been stung already
   def update_status(board, target) do
     if hit?(board, target) do
-      Map.put(board, :status, Map.put(board.status, target, "hit"))
+      updated_board = Map.put(board, :status, Map.put(board.status, target, "hit"))
+      hit_caterpillar = find_caterpillar(updated_board, target)
+      if (dead?(Map.get(updated_board.caterpillars, hit_caterpillar), updated_board.status)) do
+        updated_board |> kill_caterpillar(hit_caterpillar)
+      else
+        updated_board
+      end
     else
       Map.put(board, :status, Map.put(board.status, target, "miss"))
     end
@@ -133,9 +139,27 @@ defmodule Battleship.Board do
 
   # Status ----------------------------------------------------------------------------------------
 
+  # finds the caterpillar containing the target, if any
+  defp find_caterpillar(board, target) do
+    board.caterpillars
+    |> Enum.find(fn {k, v} -> Enum.member?(v, target) end)
+    |> elem(0)
+  end
+
+  defp kill_caterpillar(board, caterpillar_name) do
+    board.caterpillars
+    |> Map.get(caterpillar_name, [])
+    |> Enum.reduce(board, fn loci, acc -> convert_hit_to_dead(acc, loci) end)
+  end
+
+  defp convert_hit_to_dead(board, target) do
+    new_status = Map.replace!(board.status, target, "dead")
+    Map.put(board, :status, new_status)
+  end
+
   def dead?(caterpillar, status) do
     caterpillar
-    |> Enum.all?(&(Map.get(status, &1) != "miss" && Map.get(status, &1) != nil))
+    |> Enum.all?(&(Map.get(status, &1, "miss") != "miss"))
   end
 
   def lost?(board) do

@@ -56,12 +56,13 @@ function Board(props) {
         
         let isHit = s == "hit";
         let isMiss = s == "miss";
-        let hit = isHit ? " hit" : isMiss ? " miss" : "";
+	let isDead = s == "dead";
+        let hit = isHit ? " hit" : isMiss ? " miss" : isDead ? "dead" : "";
         let onClickSting = () => {if (onClick != null) {onClick(r, c, props.name);};};
         //let onClickSting = () => {console.log(c + ", " + r + ", " + props.name + ": " + onClick)};
 
         col.push(<div key={r} onClick={onClickSting.bind(this)} className={coord + " column board-cell" + (caterpillars.includes(coord) ? " caterpillar" : "") + hit}>
-          {isHit ? "X" : isMiss ? "O" : "_"}
+          {isHit ? "X" : isMiss ? "O" : isDead ? "D" : "_"}
         </div>);
       }
     }
