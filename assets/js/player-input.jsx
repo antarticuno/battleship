@@ -4,6 +4,7 @@ import _ from 'lodash';
 import {normalizeCoordinate} from './setup';
 
 export default class PlayerInput extends React.Component {
+	/**
   constructor(props) {
     super(props);
 
@@ -53,4 +54,5 @@ export default class PlayerInput extends React.Component {
       </div>
     );
   }
+  **/
 }

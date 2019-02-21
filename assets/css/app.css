@@ -30,3 +30,11 @@ button.disabled {
 .sting {
   margin-top: 20px;
 }
+
+.italicized {
+  font-style: italic;
+}
+
+#sting-message {
+  margin: 20px;
+}

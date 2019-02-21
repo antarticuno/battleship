@@ -47,6 +47,12 @@ defmodule BattleshipWeb.GamesChannel do
     {:noreply, socket}
   end
 
+  def handle_in("new", _payload, socket) do
+    game_name = socket.assigns[:game]
+    GameServer.end_game(game_name)
+    {:noreply, socket}
+  end
+
   defp authorized?(game_name, player_name) do
     # TODO game is not full OR player is already in that game and re-connecting
     # Game.waiting_for_players?(game) || Game.has_player?(game, player_name)

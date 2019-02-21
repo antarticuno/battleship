@@ -23,7 +23,7 @@ export default class SetUpForm extends React.Component {
     ev.preventDefault();
     this.props.onSubmit(this.state.caterpillar, this.state.startX, this.state.startY, this.state.isHorizontal);
   }
-
+	
   handleCaterpillarChange(ev) {
     this.setState({caterpillar: ev.target.value});
   }
@@ -40,12 +40,13 @@ export default class SetUpForm extends React.Component {
     this.setState({isHorizontal: ev.target.value})
   }
 
+
   render() {
     return (
       <form>
         Caterpillar: 
         <select name="caterpillar" value={this.state.caterpillar} onChange={this.handleCaterpillarChange}>
-          <option value="carrier">Carrier (5)</option>
+	  <option value="carrier">Carrier (5)</option>
           <option value="battleship">Battleship (4)</option>
           <option value="destroyer">Destroyer (3)</option>
           <option value="submarine">Submarine (3)</option>

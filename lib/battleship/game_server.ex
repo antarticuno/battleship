@@ -31,6 +31,14 @@ defmodule Battleship.GameServer do
     {:ok, state}
   end
 
+  def end_game(game_name) do
+    IO.puts("removing " <> game_name)
+    Registry.unregister(Battleship.GameReg, game_name)
+    BackupAgent.remove(game_name)
+    IO.inspect BackupAgent.get(game_name)
+    IO.puts(length(Registry.lookup(Battleship.GameReg, game_name)))
+  end
+
   def join(game_name, player_name) do
     if (length(Registry.lookup(Battleship.GameReg, game_name)) == 0) do
       start_link(game_name)

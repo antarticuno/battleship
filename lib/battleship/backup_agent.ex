@@ -16,4 +16,8 @@ defmodule Battleship.BackupAgent do
       Map.get(state, name)
     end
   end
+
+  def remove(name) do
+    Agent.get_and_update(__MODULE__, &(Map.pop(&1, name)))
+  end
 end
