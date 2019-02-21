@@ -133,15 +133,12 @@ defmodule Battleship.Game do
     end
   end
 
-
-
   def remaining_players(game), do: game.players -- game.rankings
 
   # are players still placing pieces on their boards?
   def setup_done?(game) do
     enough_players?(game) && 
-    Enum.all?(Map.values(game.boards),
-              fn board -> Board.all_caterpillars_placed?(board) end)
+    Enum.all?(Map.values(game.boards), fn board -> Board.all_caterpillars_placed?(board) end)
   end
 
   def enough_players?(game), do: length(game.players) == @num_players

@@ -42,8 +42,6 @@ defmodule BattleshipWeb.GamesChannel do
     game_name = socket.assigns[:game]
     game = GameServer.get_game(game_name)
     player_name = socket.assigns[:user]
-
-    # TODO make sure error gets sent to client side
     GameServer.place_caterpillar(game_name, player_name, String.to_atom(type), start_x, start_y, horizontal)
     {:noreply, socket}
   end
@@ -52,7 +50,6 @@ defmodule BattleshipWeb.GamesChannel do
     game_name = socket.assigns[:game]
     player_name = socket.assigns[:user]
     target = {x, y}
-
     GameServer.sting(game_name, player_name, opponent, target)
     {:noreply, socket}
   end
