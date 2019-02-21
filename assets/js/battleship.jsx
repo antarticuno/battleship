@@ -33,6 +33,11 @@ class Battleship extends React.Component {
     this.channel.on("error", err => { console.error(err); });
   }
 
+  gotView(view) {
+    console.log("got_view", view);
+    this.setState(view);
+  }
+
   onPlace(type, startX, startY, isHorizontal) {
     let place = {
       "type": type, 
@@ -54,8 +59,11 @@ class Battleship extends React.Component {
     }
   }
 
-  onNew() {
+  onNewGame() {
     this.channel.push("new", []);
+    // redirect to lobby
+    let url = window.location.href.split("/game");
+    window.location.replace(url[0]);
   }
 
   render() {
@@ -77,19 +85,8 @@ class Battleship extends React.Component {
     }
   }
 
-  updateView(view) {
-    console.log("update_view", view);
-    this.setState(view);
-  }
-
-  gotView(view) {
-    console.log("got_view", view);
-    this.setState(view);
-  }
-
   renderJoining() {
-    return (<div className="container">Waiting for other players to join...
-	    <p><button onClick={this.onNew.bind(this)}>Play Again?</button></p></div>);
+    return (<div className="container">Waiting for other players to join...</div>);
   }
 
   renderSetup() {
@@ -121,20 +118,20 @@ class Battleship extends React.Component {
     _.forIn(this.state.opponents, function(value, key) {
       opponentNames.push(key);
     });
+    // for games with > 2 players...
     if (this.state.rankings.includes(window.playerName)) {
       return (
-	<div className="container">
-	  <h1>You Lost</h1>
+      	<div className="container">
+      	  <h1>You Lost</h1>
           <EnemyBoards
             onClick={this.onSting.bind(this)}
             opponents={this.state.opponents}
             width={this.state.board_size.width}
             height={this.state.board_size.height}
           />
-	</div>
+      	</div>
       );
-    }
-    else {  
+    } else {  
       return (
         <div className="container">
           <div className="row">
@@ -150,7 +147,7 @@ class Battleship extends React.Component {
             </div>
             <div className="column">
               <EnemyBoards 
-	        onClick={this.onSting.bind(this)}
+      	        onClick={this.onSting.bind(this)}
                 opponents={this.state.opponents} 
                 width={this.state.board_size.width} 
                 height={this.state.board_size.height}
@@ -163,19 +160,29 @@ class Battleship extends React.Component {
   }
 
   renderGameOver() {
-    return (<ScoreBoard rankings={this.state.rankings} />);
+    return (
+      <div>
+        <h3>Game Over!</h3>
+        <ScoreBoard rankings={this.state.rankings} />
+        <p><button onClick={this.onNewGame.bind(this)}>Play Again?</button></p>
+      </div>
+    );
   }
 }
 
 function ScoreBoard(props) {
   let {rankings} = props;
   let r = _.map(rankings, (player_name, ii) => {return <p key={ii}>{ii + 1}. {player_name}</p>});
-  // TODO get this at the end: r.push(<button>Play Again?</button>);
-  return r;
+  return (
+    <div className="score-board">
+      <h5>The results:</h5>
+      <div className="rankings">{r}</div>
+    </div>
+  );
 }
 
 function PlayerTurn(props) {
   let {turn} = props;
-  if (turn) return <div id="sting-message"><h4>Time to Sting!</h4></div>;
+  if (turn) return <div id="sting-message"><h4>Click an opponent's board to sting!</h4></div>;
   else return <div id="sting-message"><h6>Be patient! Your opponents are taking aim...</h6></div>;
 }

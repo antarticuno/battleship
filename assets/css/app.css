@@ -15,11 +15,32 @@ button.disabled {
   margin-right: 20px;
 }
 
-.board-cell {
+.column.board-cell {
   text-align: center;
+  border: 0.1rem solid #d1d1d1;
+  height: 4.3rem;
+  padding: .8rem 1rem .8rem;
+}
+
+.column.board-cell.label {
+  padding-bottom: 0;
+  height: auto;
+}
+
+.opponent-boards .board-cell {
+  cursor: pointer;
+}
+
+.opponent-boards .board-cell.dead,
+.opponent-boards .board-cell.hit,
+.opponent-boards .board-cell.miss,
+.opponent-boards .board-cell.label {
+  cursor: default;
 }
 
 .board-cell.label {
+  border:none;
+  cursor: default;
   font-weight: 400;
 }
 
