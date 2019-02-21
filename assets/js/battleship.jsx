@@ -121,31 +121,45 @@ class Battleship extends React.Component {
     _.forIn(this.state.opponents, function(value, key) {
       opponentNames.push(key);
     });
-
-    return (
-      <div className="container">
-        <div className="row">
-          <div className="column">
-            <PlayerBoard 
-              myBoard={this.state.my_board} 
-              width={this.state.board_size.width}
-              height={this.state.board_size.height}
-              status={this.state.status}
-              name={window.playerName}
-            />  
-           <PlayerTurn turn={this.state.my_turn} /> 
-          </div>
-          <div className="column">
-            <EnemyBoards 
-	      onClick={this.onSting.bind(this)}
-              opponents={this.state.opponents} 
-              width={this.state.board_size.width} 
-              height={this.state.board_size.height}
-            />
+    if (this.state.rankings.includes(window.playerName)) {
+      return (
+	<div className="container">
+	  <h1>You Lost</h1>
+          <EnemyBoards
+            onClick={this.onSting.bind(this)}
+            opponents={this.state.opponents}
+            width={this.state.board_size.width}
+            height={this.state.board_size.height}
+          />
+	</div>
+      );
+    }
+    else {  
+      return (
+        <div className="container">
+          <div className="row">
+            <div className="column">
+              <PlayerBoard 
+                myBoard={this.state.my_board} 
+                width={this.state.board_size.width}
+                height={this.state.board_size.height}
+                status={this.state.status}
+                name={window.playerName}
+              />  
+             <PlayerTurn turn={this.state.my_turn} /> 
+            </div>
+            <div className="column">
+              <EnemyBoards 
+	        onClick={this.onSting.bind(this)}
+                opponents={this.state.opponents} 
+                width={this.state.board_size.width} 
+                height={this.state.board_size.height}
+              />
+            </div>
           </div>
         </div>
-      </div>
-    );
+      );
+    }
   }
 
   renderGameOver() {
