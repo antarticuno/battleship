@@ -3,7 +3,6 @@ defmodule BattleshipWeb.Router do
 
   pipeline :browser do
     plug :accepts, ["html"]
-    plug BattleshipWeb.Plugs.FetchSession, []
     plug :fetch_session
     plug :fetch_flash
     plug :protect_from_forgery
