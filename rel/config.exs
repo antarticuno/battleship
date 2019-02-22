@@ -16,6 +16,20 @@ use Mix.Releases.Config,
 # For a full list of config options for both releases
 # and environments, visit https://hexdocs.pm/distillery/config/distillery.html
 
+get_secret = fn name ->
+  # Secret generation hack by Nat Tuck for CS4550
+  # This function is dedicated to the pubic domain
+  base = Path.expand("~./config/phx-secrets")
+  File.mkdir_p!(base)
+  path = Path.join(base, name)
+  unless File.exists?(path) do
+    secret = Base.encode16(:crypto.strong_rand_bytes(32))
+    File.write!(path, secret)
+  end
+  String.trim(File.read!(path))
+end
+
+
 
 # You may define one or more environments in this file,
 # an environment's settings will override those of a release
@@ -52,4 +66,3 @@ release :battleship do
     :runtime_tools
   ]
 end
-

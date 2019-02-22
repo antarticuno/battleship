@@ -74,7 +74,7 @@ config :logger, level: :info
 get_secret = fn name ->
   # Secret generation hack by Nat Tuck for CS4550
   # This function is dedicated to the pubic domain
-  bae = Path.expand("~./config/phx-secrets")
+  base = Path.expand("~./config/phx-secrets")
   File.mkdir_p!(base)
   path = Path.join(base, name)
   unless File.exists?(path) do
@@ -84,6 +84,6 @@ get_secret = fn name ->
   String.trim(File.read!(path))
 end
 
-secret_key_base: get_secret.("key_base");
-password: get_secret("db_pass")
+#secret_key_base: get_secret.("key_base");
+#password: get_secret("db_pass")
 
