@@ -61,7 +61,6 @@ function Board(props) {
         let onClickSting = () => {if (onClick != null && !isHit && !isMiss && !isDead) {onClick(r, c, props.name);};};
 
         col.push(<div key={r} onClick={onClickSting.bind(this)} className={coord + " col column board-cell " + (caterpillars.includes(coord) ? "caterpillar " : "") + hit}>
-          {isHit ? "X" : isMiss ? "O" : isDead ? "D" : " "}
         </div>);
       }
     }

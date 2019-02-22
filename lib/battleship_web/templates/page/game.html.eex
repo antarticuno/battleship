@@ -5,7 +5,7 @@
 
  <div class="row">
   <div class="column">
-    <h2>Battleship</h2>
+    <h2>Buzzkill</h2>
     <h4 class="inline">Game Name: <%= Plug.Conn.get_session(@conn, :name) %></h4>
     <%= if Plug.Conn.get_session(@conn, :player_name) do %>
       <h4 class="inline">Playing As: <%= Plug.Conn.get_session(@conn, :player_name) %></h4>
