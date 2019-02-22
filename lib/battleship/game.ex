@@ -46,7 +46,7 @@ defmodule Battleship.Game do
     else
       game 
       |> Map.put(:players, [player_name | game.players])
-      |> Map.put(:turn, player_name) # TODO only add first player to join?
+      |> Map.put(:turn, player_name)
       |> Map.put(:boards, Map.put(game.boards, player_name, Board.new()))
     end    
   end

@@ -2,8 +2,7 @@ server {
     listen 80;
     listen [::]:80;
 
-    #TODO change this
-    server_name proj01.antarticuno.com;
+    server_name buzzkill.antarticuno.com;
 
     location / {
         proxy_pass http://localhost:4793;
